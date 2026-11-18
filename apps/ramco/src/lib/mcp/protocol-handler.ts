@@ -73,14 +73,15 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
     logMcpRequest(mcpRequest.method, mcpRequest.id, mcpRequest.params);
 
-    // Extract API key and association ID
-    const apiKey = getApiKey(request);
+    // Association filter is optional and may come from a header or the URL
     const associationId = getAssociationId(request);
 
-    // Create RAMCO client
-    const ramcoClient = createRamcoClient(apiKey);
-
-    // Handle the request based on method
+    // Handle the request based on method.
+    //
+    // Only tools/call needs RAMCO credentials. Handshake and discovery
+    // methods (initialize, ping, tools/list, ...) are answered without a
+    // key so MCP clients can probe the server before credentials are
+    // configured - Claude's custom-connector dialog does exactly that.
     let response: any;
 
     switch (mcpRequest.method) {
@@ -88,13 +89,32 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
         response = await handleInitialize(mcpRequest);
         break;
 
+      case 'ping':
+        response = createSuccessResponse(mcpRequest.id, {});
+        break;
+
       case 'tools/list':
         response = await handleToolsList(mcpRequest);
         break;
 
-      case 'tools/call':
+      case 'tools/call': {
+        let apiKey: string;
+        try {
+          apiKey = getApiKey(request);
+        } catch (authError) {
+          const message = authError instanceof Error ? authError.message : 'Unauthorized';
+          logger.warn('tools/call rejected: missing or invalid API key', { requestId: mcpRequest.id });
+          logMcpResponse(mcpRequest.method, mcpRequest.id, false, tracker.elapsed());
+          return createHttpResponse(
+            createErrorResponse(mcpRequest.id, -32001, message),
+            401
+          );
+        }
+
+        const ramcoClient = createRamcoClient(apiKey);
         response = await handleToolCall(mcpRequest, ramcoClient, associationId);
         break;
+      }
 
       case 'resources/list':
         response = handleResourcesList(mcpRequest);
@@ -104,12 +124,12 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
         response = handlePromptsList(mcpRequest);
         break;
 
-      case 'notifications/initialized':
-        // Client notification - no response needed
-        response = null;
-        break;
-
       default:
+        if (mcpRequest.method.startsWith('notifications/')) {
+          // Client notifications (initialized, cancelled, ...) need no response
+          response = null;
+          break;
+        }
         response = createErrorResponse(
           mcpRequest.id,
           -32601,
@@ -120,9 +140,12 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
     const duration = tracker.elapsed();
     logMcpResponse(mcpRequest.method, mcpRequest.id, !response?.error, duration);
 
-    // Return null response for notifications
+    // Notifications: 202 Accepted with no body (MCP Streamable HTTP spec)
     if (response === null) {
-      return new Response(null, { status: 200 });
+      return new Response(null, {
+        status: 202,
+        headers: { 'Access-Control-Allow-Origin': '*' }
+      });
     }
 
     return createHttpResponse(response);
@@ -142,9 +165,13 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 
     logMcpResponse('unknown', requestId, false, duration);
 
+    // Malformed JSON-RPC input is the client's fault: answer 400, not 500
+    const message = error instanceof Error ? error.message : '';
+    const status = message.startsWith('Invalid') ? 400 : 500;
+
     // Return error response
     const errorResponse = createMcpErrorResponse(requestId, error);
-    return createHttpResponse(errorResponse, 500);
+    return createHttpResponse(errorResponse, status);
   }
 }
 
@@ -155,9 +182,18 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
 /**
  * Handle initialize request
  */
+const SUPPORTED_PROTOCOL_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
+
 async function handleInitialize(request: McpRequest): Promise<any> {
+  // Version negotiation: echo the client's version when we support it,
+  // otherwise offer our latest and let the client decide.
+  const requested = (request.params as any)?.protocolVersion;
+  const protocolVersion = SUPPORTED_PROTOCOL_VERSIONS.includes(requested)
+    ? requested
+    : SUPPORTED_PROTOCOL_VERSIONS[0];
+
   return createSuccessResponse(request.id, {
-    protocolVersion: '2024-11-05',
+    protocolVersion,
     capabilities: {
       tools: {
         listChanged: false
