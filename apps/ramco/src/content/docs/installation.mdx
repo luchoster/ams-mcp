@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Set up RAMCO MCP Server with Claude Desktop and start analyzing your association data
+description: Connect RAMCO MCP Server to Claude Code, Claude Desktop, or claude.ai and start analyzing your association data
 ---
 
 import {
@@ -15,61 +15,39 @@ import {
 Before you begin, make sure you have:
 
 - **RAMCO API Key** - Contact your RAMCO administrator to obtain access credentials
-- **Claude Desktop** - Download from [claude.ai](https://claude.ai) (macOS or Windows)
+- **A Claude client** - Claude Code CLI, Claude Desktop, or claude.ai
 - **Association GUID** (optional but recommended) - Your RAMCO association identifier
 
 <Aside type="tip">
-  **New to MCP?** The Model Context Protocol allows AI assistants like Claude to connect to external data sources. RAMCO MCP Server bridges Claude with your RAMCO instance.
+  **New to MCP?** The Model Context Protocol allows AI assistants like Claude to connect to external data sources. RAMCO MCP Server is a **remote** MCP server: nothing is installed on your computer, you only point Claude at `https://ramco.amsmcp.dev/http` and give it your API key.
 </Aside>
 
-## Installation Steps
+## Choose Your Client
 
-<Steps>
-
-1. ### Locate Your Claude Desktop Config File
-
-   The configuration file location depends on your operating system:
-
-   **macOS:**
-   ```bash
-   ~/Library/Application Support/Claude/claude_desktop_config.json
-   ```
-
-   **Windows:**
-   ```bash
-   %APPDATA%/Claude/claude_desktop_config.json
-   ```
-
-2. ### Add RAMCO MCP Server Configuration
-
-   Open the config file and add the RAMCO MCP server configuration. Choose one of the setups below based on your needs.
-
-3. ### Restart Claude Desktop
-
-   After saving the configuration file, completely quit and restart Claude Desktop for the changes to take effect.
-
-4. ### Verify Connection
-
-   Once restarted, ask Claude:
-   ```
-   "Tell me about my association"
-   ```
-
-   If configured correctly, Claude will use the `get_association_info` tool to retrieve your association details.
-
-</Steps>
-
-## Configuration Options
-
-Choose the configuration that best fits your use case:
+The setup differs by client. Pick the tab that matches what you use.
 
 <Tabs>
-  <TabItem label="Single Association (Recommended)">
-    ```json title="claude_desktop_config.json"
+  <TabItem label="Claude Code CLI">
+    Claude Code connects to remote HTTP servers directly and can send custom headers, so this is the simplest setup.
+
+    ```bash
+    # Single association (recommended)
+    claude mcp add ramco https://ramco.amsmcp.dev/http -t http \
+      -H "Key: your-ramco-api-key-here" \
+      -H "ramco-association-id: your-association-guid-here"
+
+    # All associations
+    claude mcp add ramco https://ramco.amsmcp.dev/http -t http \
+      -H "Key: your-ramco-api-key-here"
+    ```
+
+    Or add it to a project `.mcp.json` file:
+
+    ```json title=".mcp.json"
     {
       "mcpServers": {
         "ramco": {
-          "transport": "http",
+          "type": "http",
           "url": "https://ramco.amsmcp.dev/http",
           "headers": {
             "Key": "your-ramco-api-key-here",
@@ -80,77 +58,125 @@ Choose the configuration that best fits your use case:
     }
     ```
 
-    **Best for:** Most users who work with a single association
-
-    **Benefits:**
-    - Automatic filtering of all queries to your association
-    - Prevents accidental cross-association data access
-    - Improved performance
-    - Enhanced security
+    Restart Claude Code (or run `/mcp`) and ask: *"Tell me about my association"*.
   </TabItem>
 
-  <TabItem label="All Associations">
-    ```json title="claude_desktop_config.json"
-    {
-      "mcpServers": {
-        "ramco": {
-          "transport": "http",
-          "url": "https://ramco.amsmcp.dev/http",
-          "headers": {
-            "Key": "your-ramco-api-key-here"
-          }
-        }
-      }
-    }
-    ```
+  <TabItem label="Claude Desktop / claude.ai (Connector)">
+    Claude Desktop and claude.ai use **custom connectors** for remote MCP servers. Requests come from Anthropic's cloud, so this works on every device where you are signed in, including the mobile apps.
 
-    **Best for:** Users who need to access multiple associations
+    <Steps>
 
-    **Note:** You'll need to specify the association ID in your queries or use tools that return all associations.
+    1. ### Open Connectors
+
+       Go to **Customize > Connectors** (on Team/Enterprise plans an Owner does this under **Organization settings > Connectors**).
+
+    2. ### Add a custom connector
+
+       Click **Add**, then **Add custom connector**.
+
+    3. ### Enter the name and URL
+
+       - **Name:** `RAMCO`
+       - **MCP server URL:** `https://ramco.amsmcp.dev/http?association=your-association-guid-here`
+
+       The `?association=` query parameter filters every query to that association. Leave it off to access all associations.
+
+    4. ### Choose authentication
+
+       Under **Authentication** choose **No sign-in** (RAMCO uses API keys, not OAuth).
+
+       Under **Request headers** add one header:
+
+       | Header name | Value |
+       | - | - |
+       | `authorization` | `Bearer your-ramco-api-key-here` |
+
+       Include the word `Bearer` and the space. Mark the header **Required**.
+
+    5. ### Save and test
+
+       Click **Add**, then ask Claude: *"Tell me about my association"*.
+
+    </Steps>
+
+    <Aside type="caution">
+      **Request headers is in beta.** If the **Add custom connector** dialog has no **Request headers** section, your Claude organization does not have it yet. Use the **mcp-remote** tab instead.
+    </Aside>
+
+    <Aside>
+      The association GUID goes in the **URL**, not a header, because connector headers are limited to a fixed list of approved names. `authorization` and `x-api-key` are both accepted by this server; `ramco-association-id` is not an approved connector header name.
+    </Aside>
   </TabItem>
 
-  <TabItem label="Local Development">
-    ```json title="claude_desktop_config.json"
-    {
-      "mcpServers": {
-        "ramco": {
-          "transport": "http",
-          "url": "http://localhost:3001/http",
-          "headers": {
-            "Key": "your-ramco-api-key-here",
-            "ramco-association-id": "your-association-guid-here"
-          }
-        }
-      }
-    }
-    ```
+  <TabItem label="Claude Desktop (mcp-remote)">
+    Claude Desktop's `claude_desktop_config.json` file only launches **local** servers; it ignores `url` and `headers` entries. The `mcp-remote` package bridges the gap by running a small local process that forwards to the remote server with your headers. Requires [Node.js](https://nodejs.org) 18 or newer.
 
-    **Best for:** Developers testing local changes to the MCP server
+    <Steps>
 
-    **Note:** Requires running the RAMCO MCP server locally on port 3001
-  </TabItem>
+    1. ### Locate the config file
 
-  <TabItem label="SSE Transport">
-    ```json title="claude_desktop_config.json"
-    {
-      "mcpServers": {
-        "ramco": {
-          "transport": "sse",
-          "url": "https://ramco.amsmcp.dev/sse",
-          "headers": {
-            "Key": "your-ramco-api-key-here",
-            "ramco-association-id": "your-association-guid-here"
-          }
-        }
-      }
-    }
-    ```
+       **macOS:**
+       ```bash
+       ~/Library/Application Support/Claude/claude_desktop_config.json
+       ```
 
-    **Best for:** Users who prefer Server-Sent Events for streaming responses
+       **Windows:**
+       ```bash
+       %APPDATA%\Claude\claude_desktop_config.json
+       ```
 
-    **Note:** HTTP transport is recommended for most use cases
+    2. ### Add the bridge
+
+       ```json title="claude_desktop_config.json"
+       {
+         "mcpServers": {
+           "ramco": {
+             "command": "npx",
+             "args": [
+               "-y", "mcp-remote", "https://ramco.amsmcp.dev/http",
+               "--header", "Key:${RAMCO_API_KEY}",
+               "--header", "ramco-association-id:${RAMCO_ASSOCIATION_ID}"
+             ],
+             "env": {
+               "RAMCO_API_KEY": "your-ramco-api-key-here",
+               "RAMCO_ASSOCIATION_ID": "your-association-guid-here"
+             }
+           }
+         }
+       }
+       ```
+
+       To access all associations, remove the second `--header` pair and the `RAMCO_ASSOCIATION_ID` entry.
+
+       The `${VAR}` form keeps spaces out of the arguments, which avoids a known `mcp-remote` argument-parsing problem on Windows.
+
+    3. ### Restart Claude Desktop
+
+       Completely quit and reopen Claude Desktop. The first start downloads `mcp-remote` and may take a few seconds.
+
+    4. ### Verify
+
+       Ask Claude: *"Tell me about my association"*.
+
+    </Steps>
+
+    <Aside>
+      **Windows:** if `npx` is not found, replace `"command": "npx"` with the full path, for example `"C:\\Program Files\\nodejs\\npx.cmd"`.
+    </Aside>
   </TabItem>
 </Tabs>
+
+## Local Development
+
+To test changes to the MCP server itself, run it locally on port 3001 and point Claude Code at it:
+
+```bash
+claude mcp add ramco-local http://localhost:3001/http -t http \
+  -H "Key: your-ramco-api-key-here" \
+  -H "ramco-association-id: your-association-guid-here"
+```
+
+Custom connectors cannot reach `localhost`; use Claude Code or the `mcp-remote` bridge for local testing.
 
 ## Finding Your Association GUID
 
@@ -177,32 +203,13 @@ To find your association GUID:
 
 3. ### Copy the GUID
 
-   Copy the `ramco_associationid` value and add it to your configuration as `ramco-association-id`.
+   Copy the `ramco_associationid` value and add it to your configuration: the `ramco-association-id` header (Claude Code, mcp-remote) or the `?association=` URL parameter (custom connector).
 
 </Steps>
 
 <Aside>
   **Multiple Associations?** If you have access to multiple associations, you'll see all of them in the authenticate response. Choose the one you want to work with primarily.
 </Aside>
-
-## Alternative: Claude Code CLI
-
-If you're using Claude Code CLI instead of Claude Desktop:
-
-```bash
-# Basic setup
-claude mcp add ramco https://ramco.amsmcp.dev/http -t http -e "Key=your-api-key"
-
-# Single association setup (recommended)
-claude mcp add ramco https://ramco.amsmcp.dev/http -t http \
-  -e "Key=your-api-key" \
-  -e "ramco-association-id=your-association-guid"
-
-# Local development
-claude mcp add ramco-local http://localhost:3001/http -t http \
-  -e "Key=your-api-key" \
-  -e "ramco-association-id=your-association-guid"
-```
 
 ## Testing Your Connection
 
@@ -230,11 +237,19 @@ Uses the `analyze_membership_health` tool to analyze your entire membership.
 
 ### Claude doesn't recognize RAMCO tools
 
-**Solution:** Make sure you've completely quit and restarted Claude Desktop after modifying the config file.
+**Solution:** Make sure you've completely quit and restarted Claude Desktop after modifying the config file. In Claude Code, run `/mcp` to check the server status.
+
+### Claude Desktop ignores my config
+
+**Solution:** `claude_desktop_config.json` does not support `"url"` / `"headers"` entries; those only work in Claude Code. Use the custom connector or the `mcp-remote` bridge described above.
 
 ### "API key is required" error
 
-**Solution:** Double-check that your API key is correctly entered in the `Key` header field.
+**Solution:** Double-check the key is entered correctly. In a custom connector the header must be `authorization` with the value `Bearer your-key` (including the word `Bearer` and a space), or `x-api-key` with just the key.
+
+### Custom connector shows "Couldn't reach" or "Connect"
+
+**Solution:** The URL must be exactly `https://ramco.amsmcp.dev/http` (optionally followed by `?association=...`). Choose **No sign-in**; this server does not support OAuth.
 
 ### "Association not found" error
 

@@ -47,20 +47,13 @@ RAMCO MCP Server provides **18+ tools** organized into 4 priority categories:
 
 Here's how easy it is to get started with RAMCO MCP:
 
-```json title="claude_desktop_config.json"
-{
-  "mcpServers": {
-    "ramco": {
-      "transport": "http",
-      "url": "https://ramco.amsmcp.dev/http",
-      "headers": {
-        "Key": "your-ramco-api-key-here",
-        "ramco-association-id": "your-association-guid-here"
-      }
-    }
-  }
-}
+```bash title="Claude Code"
+claude mcp add ramco https://ramco.amsmcp.dev/http -t http \
+  -H "Key: your-ramco-api-key-here" \
+  -H "ramco-association-id: your-association-guid-here"
 ```
+
+Using Claude Desktop or claude.ai instead? Add `https://ramco.amsmcp.dev/http?association=your-association-guid-here` as a custom connector with an `authorization: Bearer your-ramco-api-key-here` request header. See [Installation](/docs/installation) for every client.
 
 Once configured, you can ask Claude:
 
@@ -95,9 +88,9 @@ Top Risk Factors:
 
    Contact your RAMCO administrator to obtain API access credentials.
 
-2. ### Configure Claude Desktop
+2. ### Connect Your Claude Client
 
-   Add the RAMCO MCP server to your Claude Desktop configuration (see [Installation](/docs/installation) for detailed instructions).
+   Add the RAMCO MCP server to Claude Code, Claude Desktop, or claude.ai (see [Installation](/docs/installation) for each client).
 
 3. ### Start Analyzing
 

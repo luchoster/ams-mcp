@@ -8,17 +8,31 @@ import { Aside } from '@astrojs/starlight/components';
 
 ## Overview
 
-RAMCO MCP Server is configured entirely through HTTP headers in your Claude Desktop config file. There are no environment variables to set or separate configuration files to manage.
+RAMCO MCP Server is configured entirely through the request your Claude client sends: an API key header plus an optional association ID. There are no environment variables to set or separate configuration files to manage.
+
+How you supply those values depends on the client:
+
+| Client | API key | Association ID |
+| - | - | - |
+| Claude Code CLI (`claude mcp add` / `.mcp.json`) | `Key` header | `ramco-association-id` header |
+| Claude Desktop / claude.ai custom connector | `authorization: Bearer <key>` request header | `?association=<guid>` on the server URL |
+| Claude Desktop via `mcp-remote` | `Key` header | `ramco-association-id` header |
+
+See [Installation](/docs/installation) for step-by-step setup of each client. The examples on this page use the Claude Code `.mcp.json` format.
+
+<Aside type="caution">
+  `claude_desktop_config.json` does **not** accept `url` / `headers` entries. Claude Desktop users must use a custom connector or the `mcp-remote` bridge.
+</Aside>
 
 ## Header Configuration
 
 All configuration is done through the `headers` object in your MCP configuration:
 
-```json title="claude_desktop_config.json"
+```json title=".mcp.json (Claude Code)"
 {
   "mcpServers": {
     "ramco": {
-      "transport": "http",
+      "type": "http",
       "url": "https://ramco.amsmcp.dev/http",
       "headers": {
         "Key": "your-ramco-api-key-here",
@@ -84,6 +98,14 @@ Automatically filter all queries to a specific association:
 }
 ```
 
+The server also reads the association ID from the URL, for clients that cannot send custom headers (Claude Desktop / claude.ai custom connectors):
+
+```
+https://ramco.amsmcp.dev/http?association=965ef164-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+When both are present, the header wins. Accepted header names: `ramco-association-id`, `x-ramco-association-id`, `association-id`. Accepted URL parameters: `association`, `associationId`.
+
 **Alternate formats:**
 - `ramco-association-id`
 - `X-RAMCO-Association-ID`
@@ -110,11 +132,11 @@ RAMCO MCP Server supports two transport protocols:
 
 <Tabs>
   <TabItem label="HTTP (Recommended)">
-    ```json title="claude_desktop_config.json"
+    ```json title=".mcp.json (Claude Code)"
     {
       "mcpServers": {
         "ramco": {
-          "transport": "http",
+          "type": "http",
           "url": "https://ramco.amsmcp.dev/http",
           "headers": {
             "Key": "your-ramco-api-key-here",
@@ -136,11 +158,11 @@ RAMCO MCP Server supports two transport protocols:
   </TabItem>
 
   <TabItem label="SSE (Streaming)">
-    ```json title="claude_desktop_config.json"
+    ```json title=".mcp.json (Claude Code)"
     {
       "mcpServers": {
         "ramco": {
-          "transport": "sse",
+          "type": "sse",
           "url": "https://ramco.amsmcp.dev/sse",
           "headers": {
             "Key": "your-ramco-api-key-here",
@@ -238,11 +260,11 @@ await analyze_membership_health()
 
 For local development and testing:
 
-```json title="claude_desktop_config.json"
+```json title=".mcp.json (Claude Code)"
 {
   "mcpServers": {
     "ramco-local": {
-      "transport": "http",
+      "type": "http",
       "url": "http://localhost:3001/http",
       "headers": {
         "Key": "your-ramco-api-key-here",
@@ -270,18 +292,18 @@ pnpm dev
 The server will start on `http://localhost:3001`.
 
 <Aside type="tip">
-  **Development Tip:** You can have both production and local configurations in your Claude Desktop config simultaneously by using different server names (`ramco` and `ramco-local`).
+  **Development Tip:** You can have both production and local configurations in your MCP config simultaneously by using different server names (`ramco` and `ramco-local`). Custom connectors cannot reach `localhost`, so use Claude Code or `mcp-remote` for local testing.
 </Aside>
 
 ## Multiple Associations
 
 If you work with multiple associations, you can configure separate MCP servers for each:
 
-```json title="claude_desktop_config.json"
+```json title=".mcp.json (Claude Code)"
 {
   "mcpServers": {
     "ramco-association-a": {
-      "transport": "http",
+      "type": "http",
       "url": "https://ramco.amsmcp.dev/http",
       "headers": {
         "Key": "your-ramco-api-key-here",
@@ -289,7 +311,7 @@ If you work with multiple associations, you can configure separate MCP servers f
       }
     },
     "ramco-association-b": {
-      "transport": "http",
+      "type": "http",
       "url": "https://ramco.amsmcp.dev/http",
       "headers": {
         "Key": "your-ramco-api-key-here",
@@ -329,7 +351,7 @@ PORT=3001
 ### API Key Security
 
 ✅ **Do:**
-- Store API key in Claude Desktop config (local file, not cloud-synced)
+- Store the API key in your local MCP config file or in the connector's stored request header (never in chat)
 - Rotate API keys regularly
 - Use separate API keys for development and production
 - Revoke API keys immediately if compromised
