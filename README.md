@@ -59,7 +59,7 @@ claude mcp add ramco https://ramco.amsmcp.dev/http -t http \
   -H "ramco-association-id: YOUR_ASSOCIATION_GUID"
 ```
 
-**Claude Desktop / claude.ai**: add `https://ramco.amsmcp.dev/http?association=YOUR_ASSOCIATION_GUID` as a custom connector (Customize > Connectors > Add custom connector), choose **No sign-in**, and add an `authorization` request header with the value `Bearer YOUR_RAMCO_API_KEY`. If the Request headers section is not available on your account yet, use the `mcp-remote` bridge instead. Note that `claude_desktop_config.json` does not accept `url` / `headers` entries.
+**Claude Desktop / claude.ai**: add `https://ramco.amsmcp.dev/http?association=YOUR_ASSOCIATION_GUID` as a custom connector (Customize > Connectors > Add custom connector), click **Next**, leave **No sign-in** selected, and add a request header named `x-api-key` (chosen from the dropdown, not typed) with your RAMCO API key as the value. `authorization` with `Bearer YOUR_RAMCO_API_KEY` also works; other header names are not forwarded by Claude. If the Request headers section is not available on your account yet, use the `mcp-remote` bridge instead. Note that `claude_desktop_config.json` does not accept `url` / `headers` entries.
 
 Step-by-step instructions for every client, including `mcp-remote`: https://ramco.amsmcp.dev/docs/installation
 

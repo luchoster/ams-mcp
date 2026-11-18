@@ -83,15 +83,15 @@ The setup differs by client. Pick the tab that matches what you use.
 
     4. ### Choose authentication
 
-       Under **Authentication** choose **No sign-in** (RAMCO uses API keys, not OAuth).
+       Click **Next**. Under **Authentication** leave **No sign-in** selected (RAMCO uses API keys, not OAuth; Claude shows it as *Detected*).
 
-       Under **Request headers** add one header:
+       Under **Request headers** click **Add header**, pick the name from the dropdown and paste the value:
 
        | Header name | Value |
        | - | - |
-       | `authorization` | `Bearer your-ramco-api-key-here` |
+       | `x-api-key` | `your-ramco-api-key-here` |
 
-       Include the word `Bearer` and the space. Mark the header **Required**.
+       Leave **Required** checked. If `x-api-key` is not offered, use `authorization` with the value `Bearer your-ramco-api-key-here` (include the word `Bearer` and the space).
 
     5. ### Save and test
 
@@ -100,7 +100,11 @@ The setup differs by client. Pick the tab that matches what you use.
     </Steps>
 
     <Aside type="caution">
-      **Request headers is in beta.** If the **Add custom connector** dialog has no **Request headers** section, your Claude organization does not have it yet. Use the **mcp-remote** tab instead.
+      **The header name must come from the dropdown.** Claude only forwards a fixed list of approved header names. A typed name such as `x-key` or `ramco-key` is silently dropped, the server never receives the key, and Claude reports that the connector *needs you to sign in again*. Use `x-api-key` or `authorization`.
+    </Aside>
+
+    <Aside type="caution">
+      **Request headers is in beta.** If the dialog has no **Request headers** section after clicking **Next**, your Claude organization does not have it yet. Use the **mcp-remote** tab instead.
     </Aside>
 
     <Aside>
@@ -245,7 +249,11 @@ Uses the `analyze_membership_health` tool to analyze your entire membership.
 
 ### "API key is required" error
 
-**Solution:** Double-check the key is entered correctly. In a custom connector the header must be `authorization` with the value `Bearer your-key` (including the word `Bearer` and a space), or `x-api-key` with just the key.
+**Solution:** Double-check the key is entered correctly. In a custom connector the header must be `x-api-key` with just the key, or `authorization` with the value `Bearer your-key` (including the word `Bearer` and a space).
+
+### Custom connector says it "needs you to sign in again"
+
+**Solution:** The API key is not reaching the server. Claude turns the server's *missing key* response into a sign-in prompt. The usual cause is a header name that is not on Claude's approved list (for example `x-key`); only names chosen from the dropdown are forwarded. Remove the connector, add it again, and pick `x-api-key` or `authorization` from the dropdown. Header settings cannot be edited on an existing connector.
 
 ### Custom connector shows "Couldn't reach" or "Connect"
 

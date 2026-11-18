@@ -15,7 +15,7 @@ How you supply those values depends on the client:
 | Client | API key | Association ID |
 | - | - | - |
 | Claude Code CLI (`claude mcp add` / `.mcp.json`) | `Key` header | `ramco-association-id` header |
-| Claude Desktop / claude.ai custom connector | `authorization: Bearer <key>` request header | `?association=<guid>` on the server URL |
+| Claude Desktop / claude.ai custom connector | `x-api-key: <key>` request header (or `authorization: Bearer <key>`) | `?association=<guid>` on the server URL |
 | Claude Desktop via `mcp-remote` | `Key` header | `ramco-association-id` header |
 
 See [Installation](/docs/installation) for step-by-step setup of each client. The examples on this page use the Claude Code `.mcp.json` format.
