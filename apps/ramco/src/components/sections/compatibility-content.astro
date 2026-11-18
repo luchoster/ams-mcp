@@ -1,63 +1,73 @@
 ---
 import { createHighlighter } from 'shiki';
 
-const frameworks = [
+type Lang = 'bash' | 'json' | 'markdown';
+
+const frameworks: Array<{ name: string; lang: Lang; code: string }> = [
   {
-    name: 'Basic Setup',
-    code: `// Claude Desktop MCP Configuration
-{
-  "mcpServers": {
-    "ramco": {
-      "transport": "http",
-      "url": "https://ramco.amsmcp.dev/http",
-      "headers": {
-        "Key": "your-ramco-api-key-here"
-      }
-    }
-  }
-}`,
+    name: 'Claude Code',
+    lang: 'bash',
+    code: `# Claude Code CLI - run once, then restart Claude Code (or /mcp)
+claude mcp add ramco https://ramco.amsmcp.dev/http -t http \\
+  -H "Key: your-ramco-api-key-here" \\
+  -H "ramco-association-id: your-association-guid-here"
+
+# Access all associations instead: leave off the second -H`,
   },
   {
-    name: 'With Association Filter',
-    code: `// Filter all queries to specific association
+    name: 'Claude Code (.mcp.json)',
+    lang: 'json',
+    code: `// .mcp.json in your project root (shared with your team)
 {
   "mcpServers": {
     "ramco": {
-      "transport": "http",
+      "type": "http",
       "url": "https://ramco.amsmcp.dev/http",
       "headers": {
         "Key": "your-ramco-api-key-here",
-        "ramco-association-id": "965ef164-1234-5678-abcd-123456789abc"
+        "ramco-association-id": "your-association-guid-here"
       }
     }
   }
 }`,
   },
   {
-    name: 'Local Development',
-    code: `// Connect to local dev server
-{
-  "mcpServers": {
-    "ramco-local": {
-      "transport": "http",
-      "url": "http://localhost:3001/http",
-      "headers": {
-        "Key": "your-ramco-api-key-here"
-      }
-    }
-  }
-}`,
+    name: 'Claude Desktop / claude.ai',
+    lang: 'markdown',
+    code: `# Custom connector (works on desktop, web and mobile)
+
+1. Customize > Connectors > Add custom connector
+2. Name:  RAMCO
+   URL:   https://ramco.amsmcp.dev/http?association=your-association-guid-here
+3. Next
+4. Authentication:  No sign-in
+5. Request headers > Add header
+   Header name:  x-api-key          (pick it from the dropdown)
+   Value:        your-ramco-api-key-here
+   Required:     checked
+6. Add
+
+Leave "?association=..." off the URL to access all associations.
+Header names typed by hand (for example "x-key") are not forwarded by Claude.`,
   },
   {
-    name: 'SSE Transport',
-    code: `// Alternative SSE transport option
+    name: 'Claude Desktop (mcp-remote)',
+    lang: 'json',
+    code: `// claude_desktop_config.json - for accounts without the Request headers option
+// macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json
+// Windows: %APPDATA%\\Claude\\claude_desktop_config.json
 {
   "mcpServers": {
     "ramco": {
-      "transport": "sse",
-      "url": "https://ramco.amsmcp.dev/sse",
-      "headers": {
-        "Key": "your-ramco-api-key-here"
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote", "https://ramco.amsmcp.dev/http",
+        "--header", "Key:\${RAMCO_API_KEY}",
+        "--header", "ramco-association-id:\${RAMCO_ASSOCIATION_ID}"
+      ],
+      "env": {
+        "RAMCO_API_KEY": "your-ramco-api-key-here",
+        "RAMCO_ASSOCIATION_ID": "your-association-guid-here"
       }
     }
   }
@@ -65,22 +75,23 @@ const frameworks = [
   },
   {
     name: 'Multiple Associations',
-    code: `// Configure multiple associations separately
+    lang: 'json',
+    code: `// One server entry per association (.mcp.json for Claude Code)
 {
   "mcpServers": {
     "ramco-assoc-1": {
-      "transport": "http",
+      "type": "http",
       "url": "https://ramco.amsmcp.dev/http",
       "headers": {
-        "Key": "your-api-key",
+        "Key": "your-ramco-api-key-here",
         "ramco-association-id": "association-1-guid"
       }
     },
     "ramco-assoc-2": {
-      "transport": "http",
+      "type": "http",
       "url": "https://ramco.amsmcp.dev/http",
       "headers": {
-        "Key": "your-api-key",
+        "Key": "your-ramco-api-key-here",
         "ramco-association-id": "association-2-guid"
       }
     }
@@ -88,37 +99,32 @@ const frameworks = [
 }`,
   },
   {
-    name: 'With Authorization Header',
-    code: `// Alternative authentication format
-{
-  "mcpServers": {
-    "ramco": {
-      "transport": "http",
-      "url": "https://ramco.amsmcp.dev/http",
-      "headers": {
-        "Authorization": "Bearer your-ramco-api-key-here"
-      }
-    }
-  }
-}`,
+    name: 'Local Development',
+    lang: 'bash',
+    code: `# Run the server locally, then point Claude Code at it
+cd apps/ramco && bun run dev          # http://localhost:3001
+
+claude mcp add ramco-local http://localhost:3001/http -t http \\
+  -H "Key: your-ramco-api-key-here" \\
+  -H "ramco-association-id: your-association-guid-here"`,
   },
 ];
 
 // Pre-highlight all code samples at build time
 const highlighter = await createHighlighter({
   themes: ['github-dark-high-contrast', 'github-light-default'],
-  langs: ['json'],
+  langs: ['bash', 'json', 'markdown'],
 });
 
 const highlightedFrameworks = frameworks.map((framework) => ({
   name: framework.name,
   code: framework.code,
   lightHtml: highlighter.codeToHtml(framework.code, {
-    lang: 'json',
+    lang: framework.lang,
     theme: 'github-light-default',
   }),
   darkHtml: highlighter.codeToHtml(framework.code, {
-    lang: 'json',
+    lang: framework.lang,
     theme: 'github-dark-high-contrast',
   }),
 }));

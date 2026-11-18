@@ -21,8 +21,8 @@ export const SITE_METADATA = {
     'AI Integration',
     'Member Management',
   ],
-  authors: [{ name: 'Warren Burrows' }],
-  creator: 'Warren Burrows',
+  authors: [{ name: 'ZeraUS' }],
+  creator: 'ZeraUS',
   publisher: 'AMS MCP',
   robots: {
     index: true,
@@ -57,6 +57,5 @@ export const SITE_METADATA = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: ['/og-image.jpg'],
-    creator: '@warrenburrows',
   },
 };

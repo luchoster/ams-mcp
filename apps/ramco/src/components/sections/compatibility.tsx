@@ -37,7 +37,7 @@ const frameworks =
 
 export function Compatibility() {
   const [activeTab, setActiveTab] = useState(
-    frameworks[0]?.name || 'Basic Setup',
+    frameworks[0]?.name || 'Claude Code',
   );
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const { isAtLeast } = useMediaQuery();
@@ -84,7 +84,7 @@ export function Compatibility() {
             Configuration
           </h3>
           <h2 className="text-foreground font-weight-display leading-snug md:text-xl">
-            Claude Desktop Setup Examples:
+            Setup examples for Claude Code and Claude Desktop:
           </h2>
         </div>
 

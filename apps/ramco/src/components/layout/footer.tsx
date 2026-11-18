@@ -149,7 +149,7 @@ const Footer = () => {
         <div className="bordered-div-padding text-muted-foreground flex flex-col items-center justify-center border-x border-b text-center text-xs leading-relaxed">
           <p>
             This RAMCO MCP integration is independently developed by{' '}
-            <span className="font-medium">Warren Burrows</span>. RAMCO is a registered product of the National Association of Realtors (NAR).
+            <span className="font-medium">ZeraUS</span>. RAMCO is a registered product of the National Association of Realtors (NAR).
           </p>
           <p className="mt-1">
             This integration is not affiliated with, endorsed by, or officially connected to NAR or RAMCO.

@@ -17,16 +17,16 @@ export default function Logo({
     <a href={href} className={cn('flex items-center gap-2.5', className)}>
       <img
         src="/layout/logo-icon.svg"
-        alt="Warren Burrows Logo"
+        alt="ZeraUS logo"
         width={22}
         height={24}
         className={cn('object-contain', iconClassName)}
       />
       <img
-        src="/wb-horizontal-logo.svg"
-        alt="Warren Burrows"
-        width={51.353}
-        height={14.009}
+        src="/zeraus-logo.svg"
+        alt="ZeraUS"
+        width={314}
+        height={126}
         className={cn('object-contain', wordmarkClassName)}
       />
     </a>

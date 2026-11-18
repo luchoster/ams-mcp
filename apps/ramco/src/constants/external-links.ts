@@ -9,7 +9,7 @@ export const EXTERNAL_LINKS = {
   LINKEDIN: '#', // 'https://linkedin.com/company/your-company',
 
   // Contact
-  EMAIL: 'mailto:warren@amsmcp.dev',
+  EMAIL: 'mailto:amsmcp@zera.us',
 
   // Open Source
   GITHUB_REPO: '#', // 'https://github.com/your-org/ramco-mcp',
