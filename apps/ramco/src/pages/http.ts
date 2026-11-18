@@ -74,7 +74,7 @@ export const OPTIONS: APIRoute = async () => {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Key, Authorization, X-RAMCO-API-Key, ramco-association-id",
+      "Access-Control-Allow-Headers": "Content-Type, Key, Authorization, X-RAMCO-API-Key, x-api-key, ramco-association-id",
       "Access-Control-Max-Age": "86400"
     }
   });

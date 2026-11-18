@@ -47,10 +47,17 @@ export function getApiKey(request: Request): string {
     return validateAndReturnKey(ramcoApiKeyHeader);
   }
 
+  // Support x-api-key header (one of the standard header names offered by
+  // Claude's custom-connector "Request headers" dialog)
+  const xApiKeyHeader = request.headers.get('x-api-key');
+  if (xApiKeyHeader) {
+    return validateAndReturnKey(xApiKeyHeader);
+  }
+
   // No API key found
   throw new Error(
     'RAMCO API key is required. Pass it via header: ' +
-    '-H "Key: your-api-key" or -H "Authorization: Bearer your-api-key"'
+    '-H "Key: your-api-key", -H "Authorization: Bearer your-api-key" or -H "x-api-key: your-api-key"'
   );
 }
 
@@ -89,20 +96,44 @@ function validateAndReturnKey(apiKey: string): string {
 }
 
 /**
- * Extract association ID from request headers (optional)
+ * Extract association ID from request headers or the request URL (optional)
  * Used for multi-association environments to filter data
+ *
+ * Headers: ramco-association-id, x-ramco-association-id, association-id
+ * URL query: ?association=<guid> or ?associationId=<guid>
+ *
+ * The URL form exists for clients that cannot send custom header names,
+ * such as Claude Desktop / claude.ai custom connectors, where only a fixed
+ * set of approved header names is allowed.
  *
  * @param request - HTTP request object
  * @returns Association ID or undefined
  */
 export function getAssociationId(request: Request): string | undefined {
-  // Support various header formats for association ID
-  return (
+  const fromHeader =
     request.headers.get('ramco-association-id') ||
     request.headers.get('x-ramco-association-id') ||
-    request.headers.get('association-id') ||
-    undefined
-  );
+    request.headers.get('association-id');
+
+  if (fromHeader) {
+    return fromHeader.trim();
+  }
+
+  try {
+    const params = new URL(request.url).searchParams;
+    const fromQuery = params.get('association') || params.get('associationId');
+    if (fromQuery) {
+      const trimmed = fromQuery.trim();
+      if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(trimmed)) {
+        return trimmed;
+      }
+      logger.warn('Ignoring malformed association id in URL query', { value: trimmed.slice(0, 40) });
+    }
+  } catch {
+    // request.url not parseable - fall through
+  }
+
+  return undefined;
 }
 
 // ============================================================================
@@ -194,7 +225,7 @@ export function createHttpResponse(body: any, status: number = 200): Response {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Key, Authorization, X-RAMCO-API-Key'
+      'Access-Control-Allow-Headers': 'Content-Type, Key, Authorization, X-RAMCO-API-Key, x-api-key, ramco-association-id'
     }
   });
 }
@@ -210,7 +241,7 @@ export function createOptionsResponse(): Response {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Key, Authorization, X-RAMCO-API-Key',
+      'Access-Control-Allow-Headers': 'Content-Type, Key, Authorization, X-RAMCO-API-Key, x-api-key, ramco-association-id',
       'Access-Control-Max-Age': '86400'
     }
   });
