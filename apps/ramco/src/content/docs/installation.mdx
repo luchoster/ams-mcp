@@ -1,0 +1,274 @@
+---
+title: Installation
+description: Set up RAMCO MCP Server with Claude Desktop and start analyzing your association data
+---
+
+import {
+  Aside,
+  Steps,
+  Tabs,
+  TabItem,
+} from '@astrojs/starlight/components';
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- **RAMCO API Key** - Contact your RAMCO administrator to obtain access credentials
+- **Claude Desktop** - Download from [claude.ai](https://claude.ai) (macOS or Windows)
+- **Association GUID** (optional but recommended) - Your RAMCO association identifier
+
+<Aside type="tip">
+  **New to MCP?** The Model Context Protocol allows AI assistants like Claude to connect to external data sources. RAMCO MCP Server bridges Claude with your RAMCO instance.
+</Aside>
+
+## Installation Steps
+
+<Steps>
+
+1. ### Locate Your Claude Desktop Config File
+
+   The configuration file location depends on your operating system:
+
+   **macOS:**
+   ```bash
+   ~/Library/Application Support/Claude/claude_desktop_config.json
+   ```
+
+   **Windows:**
+   ```bash
+   %APPDATA%/Claude/claude_desktop_config.json
+   ```
+
+2. ### Add RAMCO MCP Server Configuration
+
+   Open the config file and add the RAMCO MCP server configuration. Choose one of the setups below based on your needs.
+
+3. ### Restart Claude Desktop
+
+   After saving the configuration file, completely quit and restart Claude Desktop for the changes to take effect.
+
+4. ### Verify Connection
+
+   Once restarted, ask Claude:
+   ```
+   "Tell me about my association"
+   ```
+
+   If configured correctly, Claude will use the `get_association_info` tool to retrieve your association details.
+
+</Steps>
+
+## Configuration Options
+
+Choose the configuration that best fits your use case:
+
+<Tabs>
+  <TabItem label="Single Association (Recommended)">
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "ramco": {
+          "transport": "http",
+          "url": "https://ramco.amsmcp.dev/http",
+          "headers": {
+            "Key": "your-ramco-api-key-here",
+            "ramco-association-id": "your-association-guid-here"
+          }
+        }
+      }
+    }
+    ```
+
+    **Best for:** Most users who work with a single association
+
+    **Benefits:**
+    - Automatic filtering of all queries to your association
+    - Prevents accidental cross-association data access
+    - Improved performance
+    - Enhanced security
+  </TabItem>
+
+  <TabItem label="All Associations">
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "ramco": {
+          "transport": "http",
+          "url": "https://ramco.amsmcp.dev/http",
+          "headers": {
+            "Key": "your-ramco-api-key-here"
+          }
+        }
+      }
+    }
+    ```
+
+    **Best for:** Users who need to access multiple associations
+
+    **Note:** You'll need to specify the association ID in your queries or use tools that return all associations.
+  </TabItem>
+
+  <TabItem label="Local Development">
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "ramco": {
+          "transport": "http",
+          "url": "http://localhost:3001/http",
+          "headers": {
+            "Key": "your-ramco-api-key-here",
+            "ramco-association-id": "your-association-guid-here"
+          }
+        }
+      }
+    }
+    ```
+
+    **Best for:** Developers testing local changes to the MCP server
+
+    **Note:** Requires running the RAMCO MCP server locally on port 3001
+  </TabItem>
+
+  <TabItem label="SSE Transport">
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "ramco": {
+          "transport": "sse",
+          "url": "https://ramco.amsmcp.dev/sse",
+          "headers": {
+            "Key": "your-ramco-api-key-here",
+            "ramco-association-id": "your-association-guid-here"
+          }
+        }
+      }
+    }
+    ```
+
+    **Best for:** Users who prefer Server-Sent Events for streaming responses
+
+    **Note:** HTTP transport is recommended for most use cases
+  </TabItem>
+</Tabs>
+
+## Finding Your Association GUID
+
+To find your association GUID:
+
+<Steps>
+
+1. ### Use the authenticate Tool
+
+   After configuring with just your API key (without association ID), ask Claude:
+   ```
+   "Test my RAMCO connection"
+   ```
+
+2. ### Review the Response
+
+   The `authenticate` tool will return a list of all accessible associations with their GUIDs:
+   ```json
+   {
+     "ramco_associationid": "965ef164-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+     "ramco_name": "Your Association Name"
+   }
+   ```
+
+3. ### Copy the GUID
+
+   Copy the `ramco_associationid` value and add it to your configuration as `ramco-association-id`.
+
+</Steps>
+
+<Aside>
+  **Multiple Associations?** If you have access to multiple associations, you'll see all of them in the authenticate response. Choose the one you want to work with primarily.
+</Aside>
+
+## Alternative: Claude Code CLI
+
+If you're using Claude Code CLI instead of Claude Desktop:
+
+```bash
+# Basic setup
+claude mcp add ramco https://ramco.amsmcp.dev/http -t http -e "Key=your-api-key"
+
+# Single association setup (recommended)
+claude mcp add ramco https://ramco.amsmcp.dev/http -t http \
+  -e "Key=your-api-key" \
+  -e "ramco-association-id=your-association-guid"
+
+# Local development
+claude mcp add ramco-local http://localhost:3001/http -t http \
+  -e "Key=your-api-key" \
+  -e "ramco-association-id=your-association-guid"
+```
+
+## Testing Your Connection
+
+Once installed, test your connection with these commands:
+
+### Basic Connection Test
+```
+"Test my RAMCO connection"
+```
+Uses the `authenticate` tool to verify API credentials.
+
+### Get Association Info
+```
+"Tell me about my association"
+```
+Uses the `get_association_info` tool to retrieve association details.
+
+### Quick Analytics
+```
+"Give me a membership health check"
+```
+Uses the `analyze_membership_health` tool to analyze your entire membership.
+
+## Troubleshooting
+
+### Claude doesn't recognize RAMCO tools
+
+**Solution:** Make sure you've completely quit and restarted Claude Desktop after modifying the config file.
+
+### "API key is required" error
+
+**Solution:** Double-check that your API key is correctly entered in the `Key` header field.
+
+### "Association not found" error
+
+**Solution:** Verify your association GUID is correct. Try running authenticate without the association ID first to see available associations.
+
+### Connection timeout
+
+**Solution:**
+- Verify you have internet connectivity
+- Check that the URL is correct (https://ramco.amsmcp.dev/http)
+- Try the SSE transport as an alternative
+
+### Tools return empty results
+
+**Solution:**
+- Verify your API key has proper permissions in RAMCO
+- Check that your association has the data you're querying
+- Ensure the entity types you're querying exist in your RAMCO instance
+
+<Aside type="caution">
+  **Security Note:** Your API key is transmitted via HTTPS and exists in memory only during request processing. The RAMCO MCP Server does not store, log, or retain API keys. See our [Privacy Policy](/privacy-policy) for details.
+</Aside>
+
+## Next Steps
+
+- [Configuration Options](/docs/configuration) - Headers, filtering, and advanced settings
+- [API Reference](/docs/api-reference) - All 18+ tools with parameters and examples
+- [Examples](/docs/examples) - Real-world conversation examples
+- [Guides](/docs/guides) - Workflows and best practices
+
+## Need Help?
+
+For questions or issues:
+
+- **Email:** [amsmcp@warrenburrows.dev](mailto:amsmcp@warrenburrows.dev)
+- **Website:** [https://warrenburrows.com/](https://warrenburrows.com/)
+- **API Status:** [/http](/http)

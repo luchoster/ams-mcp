@@ -1,0 +1,183 @@
+---
+layout: ../layouts/BasicLayout.astro
+title: 'Privacy Policy'
+description: 'Privacy Policy for RAMCO MCP Server - We do not store, log, or retain any of your data.'
+date: '2025-10-13'
+---
+
+# Privacy Policy
+
+**Last Updated:** October 13, 2025
+**Effective Date:** October 13, 2025
+
+## Introduction
+
+Warren Burrows ("we," "us," or "our") operates the RAMCO MCP Server (the "Service"). This Privacy Policy explains our practices regarding data collection, use, and protection when you use our Service.
+
+**Key Privacy Principle:** We are committed to protecting your privacy. We do **not** store, log, or retain any of your personal data, API keys, queries, or RAMCO data.
+
+## Information We Do NOT Collect
+
+We want to be very clear about what we **do not** collect:
+
+- **API Keys:** Your RAMCO API keys are never stored, logged, or retained
+- **Search Queries:** Your queries and requests are not logged or saved
+- **RAMCO Data:** Data that passes through our Service is not stored
+- **Personal Information:** We do not collect names, emails, or contact details
+- **Usage Analytics:** We do not track your usage patterns or behavior
+- **IP Addresses:** We do not log or store IP addresses (except for rate limiting, see below)
+- **Cookies:** We do not use cookies or browser storage
+- **Tracking:** We do not use analytics, tracking pixels, or similar technologies
+
+## How the Service Works
+
+The RAMCO MCP Server operates as a **pass-through integration**:
+
+1. You send a request from Claude (or another MCP client) to our Service
+2. Your request includes your RAMCO API key in the headers
+3. Our Service forwards your request to the RAMCO API
+4. The RAMCO API responds with data
+5. Our Service forwards the response back to you
+6. **No data is stored at any step**
+
+The Service exists only in memory during the request and is discarded immediately after the response is sent.
+
+## Rate Limiting
+
+To protect service availability and prevent abuse, we implement rate limiting based on IP addresses. This is the **only** data temporarily held in memory:
+
+- **What:** IP address and request count
+- **Why:** To enforce rate limits (100 requests per minute per IP)
+- **How Long:** Cleared from memory after 1 minute
+- **Not Stored:** This data is never written to disk or logs
+
+## No Third-Party Services
+
+Currently, we do **not** use any third-party services for:
+
+- Analytics or tracking
+- Error monitoring
+- Logging or monitoring services
+- Marketing or advertising
+
+If we add third-party services in the future, we will update this Privacy Policy and provide advance notice.
+
+## API Keys and Security
+
+**Your RAMCO API key security is critical:**
+
+- **In Transit:** API keys are transmitted via HTTPS encryption
+- **In Memory:** API keys exist in memory only during request processing
+- **Not Logged:** API keys are never written to logs or disk
+- **Not Stored:** API keys are discarded immediately after use
+- **Your Responsibility:** You are responsible for keeping your API key secure
+
+**Best Practices:**
+- Never share your API key publicly
+- Rotate your API key regularly
+- Monitor your RAMCO account for unauthorized access
+- Report any suspected security issues to [amsmcp@warrenburrows.dev](mailto:amsmcp@warrenburrows.dev)
+
+## RAMCO Data
+
+All data accessed through the Service is:
+
+- **Your Data:** You access only data your RAMCO license permits
+- **Not Stored:** RAMCO data is never stored on our servers
+- **Pass-Through Only:** Data flows through the Service without retention
+- **Your Responsibility:** You are responsible for proper use and protection of RAMCO data
+
+## Data Protection Rights
+
+Since we do not collect or store personal data, traditional data protection rights (access, deletion, portability) do not apply. However, we respect your privacy and will:
+
+- Respond to any privacy inquiries promptly
+- Clarify our data practices upon request
+- Update this policy if our practices change
+
+## Children's Privacy
+
+The Service is designed for professional association management use and is not intended for individuals under 18 years old. We do not knowingly collect information from children.
+
+## International Users
+
+The Service is accessible globally. However:
+
+- We do not store data, so no data transfer or residency issues apply
+- You remain subject to your local data protection laws
+- Your use of RAMCO API is subject to NAR's terms and your RAMCO license
+
+## Security Measures
+
+While we do not store data, we implement security measures:
+
+- **HTTPS Encryption:** All communications use HTTPS
+- **Rate Limiting:** Prevents abuse and DDoS attacks
+- **Input Validation:** Protects against injection attacks
+- **Regular Security Reviews:** We monitor and improve security practices
+
+## Changes to This Policy
+
+We may update this Privacy Policy periodically. Changes will be posted on this page with an updated "Last Updated" date.
+
+**Material changes will be communicated through:**
+- Notice on the Service homepage
+- Updated "Last Updated" date on this page
+
+Your continued use of the Service after changes constitutes acceptance of the updated Privacy Policy.
+
+## Third-Party Links
+
+This Privacy Policy applies only to our Service. When you use the Service:
+
+- **RAMCO API:** Subject to NAR's privacy policy
+- **Claude AI:** Subject to Anthropic's privacy policy
+- **External Links:** May be subject to other privacy policies
+
+We are not responsible for the privacy practices of third-party services.
+
+## Data Breach Notification
+
+In the unlikely event of a security breach affecting the Service:
+
+- We will investigate the incident immediately
+- We will notify affected users if their security may be compromised
+- We will take appropriate remedial measures
+
+However, since we do not store data, a breach of our Service would not expose your API keys or RAMCO data.
+
+## Contact Us
+
+For privacy questions or concerns:
+
+**Email:** [amsmcp@warrenburrows.dev](mailto:amsmcp@warrenburrows.dev)
+**Website:** [https://warrenburrows.com/](https://warrenburrows.com/)
+**Service URL:** [https://ramco.amsmcp.dev/](https://ramco.amsmcp.dev/)
+
+We will respond to privacy inquiries within 7 business days.
+
+---
+
+## Summary
+
+**What We Collect:** Nothing. We do not store, log, or retain any data.
+
+**What We Do:** We act as a pass-through integration between your MCP client and the RAMCO API.
+
+**Your Responsibility:** You are responsible for securing your API key and ensuring proper use of RAMCO data.
+
+**Third-Party Services:** RAMCO API (NAR) and Claude AI (Anthropic) have their own privacy policies.
+
+---
+
+## Important Disclaimers
+
+1. **Independent Service:** This integration is independently developed by Warren Burrows and is not affiliated with, endorsed by, or officially connected to NAR or RAMCO.
+
+2. **RAMCO Product:** RAMCO is a registered product of the National Association of Realtors (NAR).
+
+3. **Your RAMCO License:** Your access to RAMCO data through this Service is governed by your RAMCO license and NAR's privacy policy, not by this Privacy Policy.
+
+4. **No Data Storage:** We emphasize that we truly do not store any data. This is not a typical web service with user accounts and databases.
+
+By using the RAMCO MCP Server, you acknowledge that you have read and understood this Privacy Policy.

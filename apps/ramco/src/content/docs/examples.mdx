@@ -1,0 +1,883 @@
+---
+title: Examples
+description: Real-world conversation examples and use cases for RAMCO MCP Server
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Overview
+
+This page demonstrates real-world conversations with Claude using the RAMCO MCP Server. These examples show how to interact with your RAMCO data using natural language.
+
+## Association Health Check
+
+Get a comprehensive analysis of your association's overall health.
+
+### Example Conversation
+
+```
+User: "Give me a complete health assessment of our association"
+```
+
+**Claude's Response:**
+
+```
+📊 Association Health Analysis
+
+Total Members Analyzed: 10,247
+
+Engagement Distribution:
+• highly-engaged: 2,357 members (23.0%)
+• moderately-engaged: 4,611 members (45.0%)
+• at-risk: 2,279 members (22.2%)
+• inactive: 1,000 members (9.8%)
+
+Engagement Statistics:
+• Average Score: 52/100
+• Median Score: 48/100
+• Top 10%: 85/100 or higher
+• Bottom 25%: 25/100 or lower
+
+Top Risk Factors:
+• No event attendance in past year: 3,421 members
+• No committee involvement: 2,890 members
+• Outstanding balance: 743 members
+
+Immediate Actions Needed:
+• 407 members need immediate attention
+• Estimated revenue at risk: $203,500
+```
+
+**Tool Used:** `analyze_membership_health`
+
+<Aside type="tip">
+  This analysis processes 10,000+ members in seconds, calculating individual engagement scores and grouping members by risk level.
+</Aside>
+
+## Churn Prevention
+
+Identify members at risk of not renewing and get intervention recommendations.
+
+### Example Conversation
+
+```
+User: "Who's at risk of not renewing in the next 90 days?"
+```
+
+**Claude's Response:**
+
+```
+🚨 Churn Risk Report
+
+Analysis Period: Next 90 days
+Members Up for Renewal: 1,850
+
+Risk Distribution:
+• CRITICAL: 87 members
+• HIGH: 320 members
+• MEDIUM: 543 members
+• LOW: 900 members
+
+Predicted Churn Rate: 22.0%
+Revenue at Risk: $203,500
+
+Top 10 At-Risk Members:
+
+1. John Smith
+   • Risk Score: 92/100 (critical)
+   • Days Until Renewal: 15
+   • Key Issues: No event attendance (12 months), Outstanding balance ($1,200)
+   • Intervention: URGENT: Personal call from membership team
+
+2. Sarah Johnson
+   • Risk Score: 87/100 (critical)
+   • Days Until Renewal: 28
+   • Key Issues: Low engagement (score: 12/100), No committee involvement
+   • Intervention: Immediate personal outreach required
+
+3. Michael Chen
+   • Risk Score: 84/100 (critical)
+   • Days Until Renewal: 35
+   • Key Issues: Tenure < 1 year, Never attended events
+   • Intervention: Assign mentor, personal welcome call
+```
+
+**Tool Used:** `get_churn_risk_report`
+
+**Parameters:**
+- `daysUntilRenewal`: 90
+- `includeInterventions`: true
+
+## Smart Member Search
+
+Use natural language to find specific member segments.
+
+### Example Conversations
+
+<Tabs>
+  <TabItem label="New Members Without Engagement">
+    ```
+    User: "Find members who joined last year but haven't attended any events"
+    ```
+
+    **Claude's Response:**
+
+    ```
+    🔍 Search Results
+
+    Query: "members who joined last year but haven't attended any events"
+    Interpretation: Members who joined in 2024 and have not attended events
+    Results Found: 234 members
+
+    Sample Results (First 10):
+    • Michael Brown - mbrown@example.com
+    • Lisa Davis - ldavis@example.com
+    • Robert Wilson - rwilson@example.com
+    • Jennifer Martinez - jmartinez@example.com
+    • David Anderson - danderson@example.com
+    • Maria Garcia - mgarcia@example.com
+    • James Taylor - jtaylor@example.com
+    • Patricia Thomas - pthomas@example.com
+    • Christopher Lee - clee@example.com
+    • Nancy White - nwhite@example.com
+
+    ... and 224 more results
+
+    Filter Applied: createdon<ge>'2024-01-01' and createdon<le>'2024-12-31'
+
+    💡 Recommendations:
+    • Welcome series for recent joiners
+    • Event invitation campaign
+    • Personal outreach from chapter leaders
+    ```
+
+    **Tool Used:** `search_members_bulk`
+
+  </TabItem>
+
+  <TabItem label="Active Members with Payment Issues">
+    ```
+    User: "Show me active members with overdue payments"
+    ```
+
+    **Claude's Response:**
+
+    ```
+    🔍 Search Results
+
+    Query: "active members with overdue payments"
+    Interpretation: Active members with outstanding balances
+    Results Found: 127 members
+
+    Top 10 Members by Balance:
+    1. ABC Corporation - $5,430 overdue
+    2. John Smith - $2,150 overdue
+    3. XYZ Services LLC - $1,890 overdue
+    4. Sarah Johnson - $1,650 overdue
+    5. Mike Chen - $1,520 overdue
+
+    Total Outstanding: $87,340
+    Average Balance: $688
+
+    💡 Action Items:
+    • Send payment reminder notices
+    • Offer payment plans for large balances
+    • Follow up personally with top 20 accounts
+    ```
+
+    **Tool Used:** `search_members_bulk`
+
+  </TabItem>
+
+  <TabItem label="Committee Members">
+    ```
+    User: "Find members from downtown chapter not on any committee"
+    ```
+
+    **Claude's Response:**
+
+    ```
+    🔍 Search Results
+
+    Query: "members from downtown chapter not on any committee"
+    Interpretation: Downtown chapter members without committee assignments
+    Results Found: 456 members
+
+    This represents 42% of downtown chapter membership
+    Prime candidates for committee recruitment
+
+    💡 Engagement Opportunities:
+    • Committee fair or info session
+    • Personal invitations from committee chairs
+    • Highlight volunteer opportunities
+    • Match members to committees based on interests
+    ```
+
+    **Tool Used:** `search_members_bulk`
+
+  </TabItem>
+</Tabs>
+
+## Financial Health Analysis
+
+Monitor payment status and identify collection opportunities.
+
+### Example Conversation
+
+```
+User: "How healthy are our finances? Any payment issues?"
+```
+
+**Claude's Response:**
+
+```
+💰 Payment Health Analysis
+
+Overview:
+• Total Invoices: 8,432
+• Total Outstanding: $487,230
+• Overdue Invoices: 743
+• Collection Rate: 91.2%
+
+Aging Analysis:
+• Current: $125,000
+• 1-30 Days: $187,230
+• 31-60 Days: $98,000
+• 61-90 Days: $52,000
+• Over 90 Days: $25,000 ⚠️
+
+Payment Trends (Last 30 Days):
+• Payments Received: 1,234
+• Total Collected: $623,450
+• Average Payment: $505.22
+• On-time Payment Rate: 87.5%
+
+Action Items:
+• 🔴 Immediate collection action needed for $25,000 (90+ days)
+• 🟡 Follow up on $52,000 (60+ days)
+• 🟢 Recent trend: $623,450 collected last 30 days
+• Consider payment plans for members with large outstanding balances
+```
+
+**Tool Used:** `analyze_payment_health`
+
+<Aside>
+  The payment health tool analyzes all invoices and provides aging analysis automatically. No need to specify date ranges or filters.
+</Aside>
+
+## Growth Analysis
+
+Track membership trends and compare to previous periods.
+
+### Example Conversation
+
+```
+User: "Show me our membership trends compared to last quarter"
+```
+
+**Claude's Response:**
+
+```
+📈 Membership Snapshot
+As of 1/6/2025
+
+Total Active Members: 10,247
+New Members (30 days): 156
+Growth vs Last Quarter: 📈 +3.2%
+
+Members by Chapter:
+• Downtown: 2,341 (22.8%)
+• Westside: 1,897 (18.5%)
+• North County: 1,456 (14.2%)
+• South Bay: 1,234 (12.0%)
+• East Valley: 987 (9.6%)
+• Other: 2,332 (22.8%)
+
+Members by Type:
+• Regular: 6,148 (60.0%)
+• Associate: 2,562 (25.0%)
+• Student: 1,024 (10.0%)
+• Lifetime: 513 (5.0%)
+
+Members by Status:
+• Active: 9,234 (90.1%)
+• Pending: 543 (5.3%)
+• Inactive: 470 (4.6%)
+
+Key Metrics:
+• Average Member Tenure: 4.2 years
+• Monthly Growth Rate: 1.5%
+• Retention Rate: 92.3%
+• Estimated Annual Revenue: $5,123,500
+
+📊 Insights:
+• Strong new member acquisition (156 this month)
+• Downtown chapter leading growth
+• Focus on retention for at-risk members
+• Student membership category growing fast
+```
+
+**Tool Used:** `generate_membership_snapshot`
+
+**Parameters:**
+- `compareToDate`: "2024-10-01" (last quarter)
+
+## Individual Member Analytics
+
+Calculate engagement scores and risk assessments for specific members.
+
+### Example Conversation
+
+```
+User: "What's the engagement score for member ID abc-123?"
+```
+
+**Claude's Response:**
+
+```
+📊 Member Engagement Analysis
+John Smith (ID: abc-123)
+
+Overall Engagement Score: 42/100
+Risk Level: at-risk
+
+Score Breakdown:
+• Payment History: 8/10
+  - Current on payments
+  - No outstanding balance
+
+• Event Attendance: 2/10  ⚠️
+  - 1 event in last 12 months
+  - Last attended: 8 months ago
+
+• Committee Involvement: 0/10  ⚠️
+  - No committee assignments
+  - No volunteer hours
+
+• Communication Engagement: 6/10
+  - Opens 60% of emails
+  - Clicks through 20% of time
+
+• Membership Tenure: 7/10
+  - Member for 3.5 years
+  - Renewal rate: 100%
+
+🚨 Risk Factors:
+• Very low event attendance (1 in 12 months)
+• No committee involvement
+• Declining engagement trend
+
+💡 Recommended Interventions:
+1. Personal call from membership chair
+2. Invite to upcoming events (3 specific suggestions)
+3. Committee recruitment outreach
+4. Check in on satisfaction/needs
+5. Assign buddy/mentor from their industry
+
+⏰ Renewal Date: 45 days
+🎯 Intervention Priority: HIGH
+```
+
+**Tool Used:** `calculate_member_engagement`
+
+**Parameters:**
+- `contactId`: "abc-123"
+- `includeRecommendations`: true
+
+## Pattern Discovery
+
+Identify trends and patterns for retention and growth.
+
+### Example Conversation
+
+```
+User: "What patterns do you see in members who renew vs those who don't?"
+```
+
+**Claude's Response:**
+
+```
+🔍 Member Pattern Analysis
+Focus: Retention Patterns
+
+Members Renewed (Last 12 Months): 8,734
+Members Churned (Last 12 Months): 1,567
+Retention Rate: 84.8%
+
+Key Patterns Identified:
+
+1. Event Attendance (Strong Correlation)
+   • Renewed members average: 4.2 events/year
+   • Churned members average: 0.8 events/year
+   • 📊 Members attending 3+ events have 94% retention
+
+2. Committee Involvement (Strong Correlation)
+   • Renewed: 68% on at least one committee
+   • Churned: 12% on committees
+   • 📊 Committee members have 96% retention
+
+3. Payment Behavior (Moderate Correlation)
+   • Renewed: 89% never had late payment
+   • Churned: 43% had late payments
+   • 📊 Payment history predicts 73% of churn
+
+4. Membership Tenure (Moderate Correlation)
+   • High Risk: First-year members (78% retention)
+   • Stabilized: 3+ year members (94% retention)
+   • 📊 First year is critical engagement period
+
+5. Communication Engagement (Weak Correlation)
+   • Renewed: 54% email open rate
+   • Churned: 32% email open rate
+   • 📊 Email engagement shows early warning signs
+
+💡 Actionable Insights:
+1. Focus on first-year member onboarding
+2. Prioritize event attendance for at-risk members
+3. Aggressive committee recruitment
+4. Early intervention for payment issues
+5. Track email engagement as early warning
+
+🎯 Recommended Strategy:
+• New member: 3 events in first 90 days
+• Committee assignment within 6 months
+• Monthly check-ins for first year
+• Payment plan options before 30 days overdue
+```
+
+**Tool Used:** `identify_member_patterns`
+
+**Parameters:**
+- `analysisType`: "retention"
+
+## Common Workflows
+
+<CardGrid>
+  <Card title="Monthly Health Check" icon="document">
+    1. Run `analyze_membership_health`
+    2. Run `get_churn_risk_report`
+    3. Run `analyze_payment_health`
+    4. Run `generate_membership_snapshot` with comparison
+  </Card>
+
+  <Card title="Engagement Campaign" icon="rocket">
+    1. Use `search_members_bulk` to find target segment
+    2. Run `calculate_engagement_distribution` for insights
+    3. Use `segment_all_members` for grouping
+    4. Export and import into email system
+  </Card>
+
+  <Card title="Retention Planning" icon="star">
+    1. Run `get_churn_risk_report` (90 days)
+    2. Use `find_all_at_risk_members` for details
+    3. Run `identify_member_patterns` for insights
+    4. Create personalized intervention plans
+  </Card>
+
+  <Card title="Financial Review" icon="information">
+    1. Run `analyze_payment_health`
+    2. Use `search_members_bulk` for "overdue payments"
+    3. Run `generate_membership_snapshot` for revenue
+    4. Create collection priority list
+  </Card>
+</CardGrid>
+
+## Tips for Effective Queries
+
+### Be Specific
+
+❌ **Vague:** "Show me members"
+✅ **Specific:** "Show me active members who joined in 2024 but haven't attended any events"
+
+### Use Natural Language
+
+✅ **Natural:** "Find members from downtown chapter with outstanding balances"
+✅ **Natural:** "Who's at risk of churning in the next 60 days?"
+✅ **Natural:** "Give me an engagement report for our association"
+
+### Combine Context
+
+✅ **Good:** "Show me our financial health and identify members with payment issues over 90 days"
+
+### Ask for Recommendations
+
+✅ **Good:** "What interventions do you recommend for at-risk members?"
+✅ **Good:** "What patterns predict successful retention?"
+
+<Aside type="tip">
+  **Pro Tip:** Claude understands context, so you can have multi-turn conversations. Ask follow-up questions like "Now show me just the critical ones" or "Export that list to CSV format."
+</Aside>
+
+## Output Formats
+
+Most tools support multiple output formats:
+
+<Tabs>
+  <TabItem label="Summary (Default)">
+    ```
+    User: "Search for inactive members"
+    ```
+
+    Returns human-readable summary with key insights and recommendations.
+  </TabItem>
+
+  <TabItem label="JSON">
+    ```
+    User: "Search for inactive members, return as JSON"
+    ```
+
+    Returns structured data for further processing or export.
+  </TabItem>
+
+  <TabItem label="CSV">
+    ```
+    User: "Search for inactive members, export to CSV"
+    ```
+
+    Returns CSV-formatted data ready for Excel or CRM import.
+  </TabItem>
+
+  <TabItem label="Detailed">
+    ```
+    User: "Search for inactive members, give me detailed information"
+    ```
+
+    Returns extended details including all fields and relationships.
+  </TabItem>
+</Tabs>
+
+## Bulk Operations & Performance
+
+Process thousands of records efficiently using optimized patterns based on RAMCO API best practices.
+
+### Example: Processing All Active Members
+
+```
+User: "Generate a membership report for all active members"
+```
+
+**Behind the scenes:**
+
+The server uses optimized bulk fetching:
+- Single query with high limit (up to 20,000 records)
+- No offset pagination (RAMCO API doesn't support it properly)
+- Automatic active record filtering (`statecode<eq>0`)
+- 3-minute timeout for large datasets
+- HTTP 206 (Partial Content) response handling
+
+**Performance:**
+- Process 13,000+ members in ~2 minutes
+- 95% fewer API calls vs N+1 queries
+- 93% reduction in bulk errors
+
+### Active Record Filtering
+
+**Critical:** Always filter for active records to prevent errors from processing inactive/deleted data.
+
+<Tabs>
+  <TabItem label="Automatic (Tools)">
+    All bulk tools automatically add `statecode<eq>0` filtering:
+
+    ```
+    User: "Show me all members"
+    ```
+
+    Internally filters: `statecode<eq>0` (Active only)
+  </TabItem>
+
+  <TabItem label="Manual (Search)">
+    When using `search_records` directly, always include:
+
+    ```typescript
+    filter: "statecode<eq>0 and ModifiedOn<ge>'2024-01-01'"
+    ```
+
+    StatusCode values:
+    - `0` = Active (✅ Include)
+    - `1` = Inactive (❌ Exclude)
+  </TabItem>
+</Tabs>
+
+<Aside type="caution">
+  **Important:** Without `statecode<eq>0` filtering, you'll get errors processing inactive/deleted records. All bulk operations apply this filter automatically.
+</Aside>
+
+## Two-Phase Sync Pattern
+
+Efficiently sync large datasets by fetching IDs first, then full records. Based on RAMCO's recommended patterns.
+
+### Example Conversation
+
+```
+User: "Sync all members modified since January 1st"
+```
+
+**How it works:**
+
+**Phase 1:** Get IDs of modified contacts
+```typescript
+filter: "statecode<eq>0 and ModifiedOn<ge>'2024-01-01'"
+fields: ["ContactId"]
+```
+
+**Phase 2:** Get IDs from modified memberships
+```typescript
+filter: "ModifiedOn<ge>'2024-01-01'"
+fields: ["cobalt_contactid"]
+```
+
+**Phase 3:** Deduplicate and fetch full records
+```typescript
+// Merge ContactIds from both queries
+// Fetch full details in single query or batches
+```
+
+**Benefits:**
+- Captures changes from both contacts AND memberships
+- Deduplicates automatically
+- Significantly fewer API calls
+- Handles large datasets efficiently
+
+### Use Cases
+
+<CardGrid>
+  <Card title="Incremental Sync" icon="refresh">
+    Sync only records modified since last sync
+
+    ```
+    User: "Sync members modified in last 24 hours"
+    ```
+  </Card>
+
+  <Card title="Selective Export" icon="download">
+    Export specific member segments
+
+    ```
+    User: "Export all Realtor members modified this month"
+    ```
+  </Card>
+
+  <Card title="Data Integrity" icon="approve-check">
+    Identify members with membership changes
+
+    ```
+    User: "Find members whose membership status changed"
+    ```
+  </Card>
+</CardGrid>
+
+## Relationship Navigation
+
+Fetch related data in a single API call using the `/` syntax pattern.
+
+### Example: Contact with Memberships
+
+Instead of 3 separate API calls:
+
+<Tabs>
+  <TabItem label="Old Way (3 Calls)">
+    ```typescript
+    // ❌ Multiple API calls (slow)
+    const contact = await getRecord(contactId);
+    const memberships = await getRelatedRecords(contactId, 'membership');
+    const committees = await getRelatedRecords(contactId, 'committee');
+    ```
+
+    **Performance:** 3 API calls, ~3-5 seconds
+  </TabItem>
+
+  <TabItem label="New Way (1 Call)">
+    ```typescript
+    // ✅ Single API call with relationships
+    const contact = await getRecordWithRelationships(
+      contactId,
+      'contact',
+      {
+        baseFields: ['ContactId', 'FirstName', 'LastName'],
+        relationships: {
+          'cobalt_contact_cobalt_membership': ['StatusCode', 'cobalt_MemberTypeId'],
+          'cobalt_contact_cobalt_committeemembership': ['cobalt_CommitteeId']
+        }
+      }
+    );
+    ```
+
+    **Performance:** 1 API call, ~1 second
+  </TabItem>
+</Tabs>
+
+### Available Relationships
+
+Common relationship patterns for efficient queries:
+
+**Contact → Memberships**
+```typescript
+'cobalt_contact_cobalt_membership': ['StatusCode', 'cobalt_MemberTypeId', 'ramco_AssociationId']
+```
+
+**Contact → Committees**
+```typescript
+'cobalt_contact_cobalt_committeemembership': ['StatusCode', 'cobalt_CommitteeId', 'cobalt_name']
+```
+
+**Contact → Events**
+```typescript
+'cobalt_contact_cobalt_meetingregistration': ['cobalt_name', 'createdon', 'statecode']
+```
+
+**Membership → Contact**
+```typescript
+'cobalt_contactid': ['FirstName', 'LastName', 'EmailAddress1']
+```
+
+<Aside type="tip">
+  **Performance Tip:** Only fetch relationship fields you need. Requesting fewer fields = faster queries.
+</Aside>
+
+## Filter Building & Optimization
+
+Build complex filters using RAMCO's filter syntax.
+
+### Filter Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `<eq>` | Equal to | `statecode<eq>0` |
+| `<ne>` | Not equal to | `StatusCode<ne>1` |
+| `<gt>` | Greater than | `createdon<gt>'2024-01-01'` |
+| `<ge>` | Greater or equal | `ModifiedOn<ge>'2024-01-01'` |
+| `<lt>` | Less than | `createdon<lt>'2024-12-31'` |
+| `<le>` | Less or equal | `ModifiedOn<le>'2024-12-31'` |
+| `<like>` | Contains | `LastName<like>'Smith%'` |
+| `<notlike>` | Not contains | `EmailAddress1<notlike>'@gmail.com'` |
+| `<sb>` | Starts with | `LastName<sb>'Mc'` |
+| `<sc>` | Contains substring | `FirstName<sc>'john'` |
+| `in (...)` | In list | `ContactId in ('id1','id2','id3')` |
+
+### Complex Filter Examples
+
+<Tabs>
+  <TabItem label="Active & Recent">
+    ```typescript
+    // Active members modified in 2024
+    filter: "statecode<eq>0 and ModifiedOn<ge>'2024-01-01'"
+    ```
+  </TabItem>
+
+  <TabItem label="Association Filter">
+    ```typescript
+    // Active members in specific association
+    filter: "statecode<eq>0 and ramco_primaryassociationid<eq>'association-guid'"
+    ```
+  </TabItem>
+
+  <TabItem label="Member Type">
+    ```typescript
+    // Active Realtor members modified this year
+    filter: "statecode<eq>0 and cobalt_MemberTypeId<eq>'type-guid' and ModifiedOn<ge>'2024-01-01'"
+    ```
+  </TabItem>
+
+  <TabItem label="Batch IN Query">
+    ```typescript
+    // Events for multiple contacts
+    filter: "cobalt_contactid in ('id1','id2','id3','id4','id5')"
+    ```
+  </TabItem>
+</Tabs>
+
+### Filter Utility Functions
+
+The server provides utility functions for common filters:
+
+```typescript
+import { activeFilter, contactFilter, andFilters } from '@/lib/utils/ramco-filters';
+
+// Simple active filter
+const filter = activeFilter(); // "statecode<eq>0"
+
+// Complex contact filter
+const filter = contactFilter({
+  active: true,
+  associationId: 'abc-123',
+  modifiedSince: '2024-01-01',
+  additionalFilters: ["EmailAddress1<notlike>'@temp.com'"]
+});
+```
+
+<Aside type="tip">
+  **Best Practice:** Always start filters with `statecode<eq>0` for bulk operations to avoid processing inactive records.
+</Aside>
+
+## Advanced Techniques
+
+### Batch Processing with IN Queries
+
+Process multiple records in a single query:
+
+```
+User: "Get event attendance for the top 20 engaged members"
+```
+
+**Behind the scenes:**
+
+```typescript
+// Step 1: Get top 20 member IDs
+const topMembers = await searchRecords({
+  filter: "statecode<eq>0",
+  limit: 20,
+  sort: "-engagement_score"
+});
+
+// Step 2: Fetch events for all 20 in ONE query
+const contactIds = topMembers.map(m => m.ContactId);
+const inClause = contactIds.map(id => `'${id}'`).join(',');
+
+const events = await searchRecords({
+  module: 'cobalt_meetingregistration',
+  filter: `cobalt_contactid in (${inClause})`,
+  limit: 1000
+});
+```
+
+**Performance:** 1 query for 20 members instead of 20 separate queries.
+
+### Pagination Limitations
+
+<Aside type="caution">
+  **Important:** RAMCO API doesn't support offset-based pagination properly. Don't use `offset` in production.
+</Aside>
+
+**Don't do this:**
+```typescript
+// ❌ Offset pagination doesn't work in RAMCO
+offset: 5000 // Returns same results as offset: 0
+```
+
+**Do this instead:**
+```typescript
+// ✅ Single query with high limit
+limit: 20000 // Fetch all records in one call
+```
+
+### Timeout Configuration
+
+Large bulk operations need longer timeouts:
+
+- **Default:** 30 seconds
+- **Bulk operations:** 180 seconds (3 minutes)
+- **Largest dataset tested:** 14,945 members in 2m 2s
+
+The server automatically uses extended timeouts for bulk tools.
+
+## Next Steps
+
+- [Guides](/docs/guides) - Best practices and workflows
+- [Configuration](/docs/configuration) - Advanced settings
+- [Installation](/docs/installation) - Setup instructions
+
+<Aside type="caution">
+  **Remember:** All queries respect your `ramco-association-id` header setting. If you're not seeing expected results, verify your association ID is configured correctly.
+</Aside>

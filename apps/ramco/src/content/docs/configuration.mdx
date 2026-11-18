@@ -1,0 +1,417 @@
+---
+title: Configuration
+description: Configure RAMCO MCP Server headers, association filtering, and advanced settings
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+## Overview
+
+RAMCO MCP Server is configured entirely through HTTP headers in your Claude Desktop config file. There are no environment variables to set or separate configuration files to manage.
+
+## Header Configuration
+
+All configuration is done through the `headers` object in your MCP configuration:
+
+```json title="claude_desktop_config.json"
+{
+  "mcpServers": {
+    "ramco": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here",
+        "ramco-association-id": "your-association-guid-here"
+      }
+    }
+  }
+}
+```
+
+## Required Headers
+
+### API Key (Required)
+
+The API key authenticates your connection to the RAMCO API. The server accepts the API key in multiple header formats:
+
+<Tabs>
+  <TabItem label="Key (Recommended)">
+    ```json
+    "headers": {
+      "Key": "your-ramco-api-key-here"
+    }
+    ```
+
+    **Best for:** Direct RAMCO API key format (matches RAMCO's native format)
+  </TabItem>
+
+  <TabItem label="X-RAMCO-API-Key">
+    ```json
+    "headers": {
+      "X-RAMCO-API-Key": "your-ramco-api-key-here"
+    }
+    ```
+
+    **Best for:** Explicit header naming for clarity
+  </TabItem>
+
+  <TabItem label="Authorization Bearer">
+    ```json
+    "headers": {
+      "Authorization": "Bearer your-ramco-api-key-here"
+    }
+    ```
+
+    **Best for:** OAuth-style authentication compatibility
+  </TabItem>
+</Tabs>
+
+<Aside type="tip">
+  **Recommendation:** Use `Key` as it matches RAMCO's native API format exactly.
+</Aside>
+
+## Optional Headers
+
+### Association ID (Recommended)
+
+Automatically filter all queries to a specific association:
+
+```json
+"headers": {
+  "Key": "your-ramco-api-key-here",
+  "ramco-association-id": "965ef164-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+}
+```
+
+**Alternate formats:**
+- `ramco-association-id`
+- `X-RAMCO-Association-ID`
+- `X-Association-ID`
+
+**Benefits of setting association ID:**
+- ✅ Automatic filtering prevents cross-association data leaks
+- ✅ Improved performance (smaller datasets)
+- ✅ Enhanced security (explicit scope limitation)
+- ✅ Simplified queries (no need to specify association in each request)
+
+**When to omit:**
+- You need to access multiple associations
+- You want to see all associations available to your API key
+- You're using administrative tools that span associations
+
+<Aside>
+  **Pro Tip:** Even if you have access to multiple associations, setting a default association ID for your primary association is recommended for security and performance.
+</Aside>
+
+## Transport Options
+
+RAMCO MCP Server supports two transport protocols:
+
+<Tabs>
+  <TabItem label="HTTP (Recommended)">
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "ramco": {
+          "transport": "http",
+          "url": "https://ramco.amsmcp.dev/http",
+          "headers": {
+            "Key": "your-ramco-api-key-here",
+            "ramco-association-id": "your-association-guid-here"
+          }
+        }
+      }
+    }
+    ```
+
+    **Advantages:**
+    - No Redis dependency
+    - Simpler infrastructure
+    - Better for most use cases
+    - Easier to debug
+    - Lower latency
+
+    **Best for:** Most users and production deployments
+  </TabItem>
+
+  <TabItem label="SSE (Streaming)">
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "ramco": {
+          "transport": "sse",
+          "url": "https://ramco.amsmcp.dev/sse",
+          "headers": {
+            "Key": "your-ramco-api-key-here",
+            "ramco-association-id": "your-association-guid-here"
+          }
+        }
+      }
+    }
+    ```
+
+    **Advantages:**
+    - Server-Sent Events for real-time streaming
+    - Long-lived connections
+    - Better for event streams
+
+    **Best for:** Users who prefer streaming responses or have specific SSE requirements
+  </TabItem>
+</Tabs>
+
+## Association Filtering
+
+The `ramco-association-id` header automatically applies filters to these entity types:
+
+- **contact** - Individual people/contacts
+- **cobalt_membership** - Membership records
+- **cobalt_meeting** - Meetings and events
+- **cobalt_committee** - Committee records
+- **cobalt_class** - Training classes
+- **invoice** - Financial invoices
+
+### How It Works
+
+When you set `ramco-association-id`, the server automatically adds association filters to your queries:
+
+**Without association ID:**
+```javascript
+// Query returns ALL contacts from ALL associations
+search_records({
+  entityType: "contact",
+  filter: "LastName<eq>'Smith'"
+})
+```
+
+**With association ID set in headers:**
+```javascript
+// Query automatically filtered to your association only
+search_records({
+  entityType: "contact",
+  filter: "LastName<eq>'Smith'"
+})
+// Internally applies: ramco_primaryassociationid<eq>'your-association-guid'
+```
+
+### Manual Filtering
+
+If you don't set the association ID header, you can still filter manually in your queries:
+
+```javascript
+search_records({
+  entityType: "contact",
+  filter: "ramco_primaryassociationid<eq>'965ef164-xxxx-xxxx-xxxx-xxxxxxxxxxxx' and LastName<eq>'Smith'"
+})
+```
+
+<Aside type="caution">
+  **Security Warning:** Without the `ramco-association-id` header, you must manually filter every query. This increases the risk of accidentally querying data from other associations.
+</Aside>
+
+## Rate Limiting
+
+The RAMCO MCP Server implements rate limiting to ensure fair usage:
+
+- **Rate:** 100 requests per minute per IP address
+- **Scope:** Per IP address (not per API key)
+- **Response:** HTTP 429 (Too Many Requests) when exceeded
+- **Reset:** Limits reset after 1 minute
+
+**Best Practices:**
+- Batch operations when possible
+- Use bulk analytics tools (they count as single requests)
+- Implement exponential backoff for retries
+- Cache frequently accessed data on your side
+
+```javascript
+// ❌ Bad: 100 separate requests
+for (let i = 0; i < 100; i++) {
+  await get_record({ entityType: "contact", id: ids[i] })
+}
+
+// ✅ Good: 1 bulk request
+await analyze_membership_health()
+```
+
+## Local Development
+
+For local development and testing:
+
+```json title="claude_desktop_config.json"
+{
+  "mcpServers": {
+    "ramco-local": {
+      "transport": "http",
+      "url": "http://localhost:3001/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here",
+        "ramco-association-id": "your-association-guid-here"
+      }
+    }
+  }
+}
+```
+
+**Local Development Setup:**
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/ramco-mcp.git
+cd ramco-mcp/turbo-mcp/apps/ramco
+
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+```
+
+The server will start on `http://localhost:3001`.
+
+<Aside type="tip">
+  **Development Tip:** You can have both production and local configurations in your Claude Desktop config simultaneously by using different server names (`ramco` and `ramco-local`).
+</Aside>
+
+## Multiple Associations
+
+If you work with multiple associations, you can configure separate MCP servers for each:
+
+```json title="claude_desktop_config.json"
+{
+  "mcpServers": {
+    "ramco-association-a": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here",
+        "ramco-association-id": "association-a-guid-here"
+      }
+    },
+    "ramco-association-b": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here",
+        "ramco-association-id": "association-b-guid-here"
+      }
+    }
+  }
+}
+```
+
+**Usage:**
+Claude will present tools from both servers, allowing you to specify which association you want to query in your prompts:
+
+```
+"Analyze membership health for Association A"
+"Show me payment status for Association B"
+```
+
+## Environment Variables
+
+The RAMCO MCP Server itself uses these environment variables (only relevant for self-hosting):
+
+```bash title=".env.local"
+# Optional: Override RAMCO API base URL (defaults to https://api.ramcoams.com/api/v2)
+RAMCO_BASE_URL=https://api.ramcoams.com/api/v2
+
+# Optional: Set development port (defaults to 3001)
+PORT=3001
+```
+
+<Aside>
+  **Note:** These environment variables are for server hosting only. If you're using the hosted service at `ramco.amsmcp.dev`, you don't need to worry about these.
+</Aside>
+
+## Security Best Practices
+
+### API Key Security
+
+✅ **Do:**
+- Store API key in Claude Desktop config (local file, not cloud-synced)
+- Rotate API keys regularly
+- Use separate API keys for development and production
+- Revoke API keys immediately if compromised
+- Monitor RAMCO audit logs for unusual activity
+
+❌ **Don't:**
+- Share API keys in chat or screenshots
+- Commit API keys to Git repositories
+- Use production API keys in development
+- Share config files with API keys
+
+### Association Filtering
+
+✅ **Do:**
+- Always set `ramco-association-id` for single-association use
+- Verify association GUID before adding to config
+- Use separate MCP servers for different associations
+- Test filters before querying production data
+
+❌ **Don't:**
+- Query without association ID unless necessary
+- Assume filters are applied automatically (verify!)
+- Mix association GUIDs between environments
+
+## Privacy & Data Handling
+
+The RAMCO MCP Server:
+
+- ✅ **Does NOT store** API keys (memory only during requests)
+- ✅ **Does NOT log** queries or data
+- ✅ **Does NOT retain** RAMCO data
+- ✅ **Does NOT use** cookies or tracking
+- ✅ **Does use** temporary IP-based rate limiting (cleared after 1 minute)
+
+All data passes through the server and is immediately discarded. See our [Privacy Policy](/privacy-policy) for complete details.
+
+## Troubleshooting Configuration
+
+### "API key is required" Error
+
+**Cause:** Missing or incorrect API key header
+
+**Solution:**
+```json
+// ✅ Correct
+"headers": {
+  "Key": "your-actual-api-key"
+}
+
+// ❌ Incorrect
+"headers": {
+  "Key": "your-ramco-api-key-here"  // Don't use placeholder
+}
+```
+
+### "Association not found" Error
+
+**Cause:** Invalid association GUID
+
+**Solution:**
+1. Remove `ramco-association-id` temporarily
+2. Ask Claude: "Test my RAMCO connection"
+3. Copy the correct `ramco_associationid` from the response
+4. Update your config with the correct GUID
+
+### Tools Return Wrong Association Data
+
+**Cause:** Missing or incorrect association ID
+
+**Solution:** Add or verify `ramco-association-id` header matches your intended association
+
+### Rate Limit Errors
+
+**Cause:** Exceeded 100 requests per minute
+
+**Solution:**
+- Wait 1 minute for rate limit to reset
+- Use bulk analytics tools instead of individual queries
+- Implement request throttling in your queries
+
+## Next Steps
+
+- [API Reference](/docs/api-reference) - Complete tool documentation
+- [Examples](/docs/examples) - See configuration in action
+- [Guides](/docs/guides) - Best practices and workflows

@@ -1,0 +1,16 @@
+---
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+import { Compatibility } from '@/components/sections/compatibility';
+import CompatibilityContent from '@/components/sections/compatibility-content.astro';
+import { Features } from '@/components/sections/features';
+import { Hero } from '@/components/sections/hero';
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+---
+
+<DefaultLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <CompatibilityContent />
+  <Hero client:load />
+  <Features client:visible />
+  <Compatibility client:visible />
+</DefaultLayout>

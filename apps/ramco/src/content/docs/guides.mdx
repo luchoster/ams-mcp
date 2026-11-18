@@ -1,0 +1,398 @@
+---
+title: Guides
+description: Workflows, best practices, and pro tips for RAMCO MCP Server
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Common Workflows
+
+<CardGrid>
+  <Card title="Monthly Health Check" icon="document">
+    Regular association health monitoring and reporting
+  </Card>
+  <Card title="Retention Campaign" icon="star">
+    Identify and re-engage at-risk members
+  </Card>
+  <Card title="Financial Review" icon="information">
+    Monitor payment health and collections
+  </Card>
+  <Card title="Engagement Analysis" icon="rocket">
+    Discover patterns and optimize member engagement
+  </Card>
+</CardGrid>
+
+## Monthly Health Check Workflow
+
+Perform a comprehensive association health check every month.
+
+<Steps>
+
+1. ### Analyze Overall Health
+
+   Ask Claude:
+   ```
+   "Give me a complete health assessment of our association"
+   ```
+
+   This runs `analyze_membership_health` and provides:
+   - Total member count and engagement distribution
+   - Risk factor identification
+   - Statistical analysis (mean, median, percentiles)
+
+2. ### Review Churn Risks
+
+   Ask Claude:
+   ```
+   "Show me members at risk of churning in the next 90 days"
+   ```
+
+   This runs `get_churn_risk_report` and identifies:
+   - Members with upcoming renewals
+   - Risk scores and intervention recommendations
+   - Predicted churn rate and revenue impact
+
+3. ### Check Financial Health
+
+   Ask Claude:
+   ```
+   "Analyze our payment health and aging"
+   ```
+
+   This runs `analyze_payment_health` and shows:
+   - Collection rates and outstanding balances
+   - Aging analysis (30/60/90+ days)
+   - Payment trends
+
+4. ### Compare to Previous Period
+
+   Ask Claude:
+   ```
+   "Generate a membership snapshot compared to last month"
+   ```
+
+   This runs `generate_membership_snapshot` with comparison:
+   - Growth metrics and trends
+   - Breakdown by chapter, type, and status
+   - Key performance indicators
+
+</Steps>
+
+<Aside type="tip">
+  **Pro Tip:** Schedule this workflow for the same day each month (e.g., first Monday) to track trends consistently.
+</Aside>
+
+## Retention Campaign Workflow
+
+Launch a targeted retention campaign for at-risk members.
+
+<Steps>
+
+1. ### Identify At-Risk Segments
+
+   Ask Claude:
+   ```
+   "Find all members who are at-risk across multiple factors"
+   ```
+
+   This runs `find_all_at_risk_members` to identify:
+   - Payment delinquency
+   - Low engagement
+   - Short tenure members
+   - Poor communication response
+
+2. ### Analyze Engagement Patterns
+
+   Ask Claude:
+   ```
+   "What patterns do you see in our most engaged vs least engaged members?"
+   ```
+
+   This runs `identify_member_patterns` to discover:
+   - What drives engagement
+   - Common risk factors
+   - Successful retention strategies
+
+3. ### Segment Members
+
+   Ask Claude:
+   ```
+   "Segment all members by risk level"
+   ```
+
+   This runs `segment_all_members` with strategy "risk":
+   - Critical risk members
+   - High risk members
+   - Medium risk members
+   - Low risk members
+
+4. ### Create Targeted Lists
+
+   Ask Claude:
+   ```
+   "Export critical risk members with their contact info and risk factors to CSV"
+   ```
+
+   Get data ready for:
+   - Email campaigns
+   - Personal outreach lists
+   - CRM import
+
+5. ### Track Progress
+
+   After 30 days, ask Claude:
+   ```
+   "Show me engagement score changes for members who were at critical risk last month"
+   ```
+
+</Steps>
+
+## Financial Review Workflow
+
+Monthly financial health and collections review.
+
+<Steps>
+
+1. ### Overall Payment Health
+
+   ```
+   "Analyze our payment health across all members"
+   ```
+
+   Provides aging analysis and collection rates.
+
+2. ### Identify Payment Issues
+
+   ```
+   "Find members with balances over 90 days"
+   ```
+
+   Returns targeted list for collection efforts.
+
+3. ### Revenue Analysis
+
+   ```
+   "Show me payment trends for the last 3 months"
+   ```
+
+   Tracks collection performance over time.
+
+4. ### Create Action Plan
+
+   Ask Claude to prioritize:
+   ```
+   "Sort members by outstanding balance and days overdue, show me top 20"
+   ```
+
+</Steps>
+
+## Best Practices
+
+### Effective Queries
+
+**Be Specific**
+
+❌ **Too Vague:** "Show me members"
+✅ **Better:** "Show me active members from downtown chapter with outstanding balances over $500"
+
+**Use Natural Language**
+
+✅ "Find members who joined this year but haven't attended any events"
+✅ "Who's at risk of not renewing in the next 60 days?"
+✅ "Give me our top 10 most engaged members"
+
+**Ask Follow-Up Questions**
+
+Claude maintains context, so you can ask:
+1. "Show me at-risk members"
+2. "Now filter that to just critical risk"
+3. "Export those to CSV with contact info"
+
+### Data Management
+
+**Association Filtering**
+
+Always set `ramco-association-id` in your configuration to:
+- ✅ Prevent cross-association data access
+- ✅ Improve query performance
+- ✅ Simplify all queries
+
+**Query Optimization**
+
+- Use bulk tools (analyze_membership_health) instead of individual queries
+- Export large datasets to CSV for offline analysis
+- Cache frequently accessed reports
+
+**Rate Limiting**
+
+- Limit: 100 requests per minute per IP
+- Use bulk analytics tools (they count as single requests)
+- Avoid loops of individual record queries
+
+### Interpretation Tips
+
+**Engagement Scores**
+
+- **75-100**: Highly engaged (celebrate these members!)
+- **50-74**: Moderately engaged (nurture and grow)
+- **25-49**: At-risk (intervention needed)
+- **0-24**: Inactive (urgent action required)
+
+**Risk Levels**
+
+- **CRITICAL**: Immediate personal intervention (call, meeting)
+- **HIGH**: Targeted outreach within 7 days
+- **MEDIUM**: Include in re-engagement campaigns
+- **LOW**: Standard retention activities
+
+**Churn Prediction**
+
+- Focus on members within 30 days of renewal
+- Prioritize high-value/long-tenure members
+- Use recommended interventions as guidelines
+
+### Intervention Strategies
+
+**For At-Risk Members**
+
+1. **Personal Touch**: Phone call from membership chair or director
+2. **Event Invitation**: 3-5 specific events matching their interests
+3. **Committee Recruitment**: Match skills to committee needs
+4. **Value Reminder**: Highlight benefits they're not using
+5. **Feedback Request**: "How can we serve you better?"
+
+**For Payment Issues**
+
+1. **30 Days**: Friendly reminder email
+2. **60 Days**: Personal call offering payment plan
+3. **90+ Days**: Escalate to collections process
+4. **Always**: Make payment easy (online options, flexible plans)
+
+**For New Members (First 90 Days)**
+
+1. **Week 1**: Welcome email with getting started guide
+2. **Week 2**: Personal call from membership team
+3. **Month 1**: Invite to new member orientation event
+4. **Month 2**: Committee fair invitation
+5. **Month 3**: Check-in survey and engagement scoring
+
+## Advanced Techniques
+
+### Comparative Analysis
+
+Compare time periods:
+```
+"Show me membership growth this quarter vs last quarter"
+"Compare event attendance this year vs last year"
+```
+
+### Predictive Insights
+
+Ask for patterns:
+```
+"What patterns predict successful retention?"
+"What factors lead to high engagement?"
+"What's the common profile of members who renew vs those who don't?"
+```
+
+### Custom Segmentation
+
+Create specific segments:
+```
+"Find members who:
+- Joined in last 2 years
+- Haven't attended events in 6 months
+- Are on at least one committee
+- Have no outstanding balance"
+```
+
+### Batch Operations
+
+Process multiple related queries:
+```
+"Give me a complete executive summary including:
+1. Membership health analysis
+2. Churn risk report for next 90 days
+3. Payment health with aging
+4. Growth comparison to last quarter"
+```
+
+## Troubleshooting
+
+### No Results Returned
+
+**Check:**
+- Is `ramco-association-id` set correctly?
+- Does the data exist in RAMCO for the query?
+- Are you using the correct entity type names?
+
+**Try:**
+```
+"Test my RAMCO connection"
+"Tell me about my association"
+```
+
+### Unexpected Results
+
+**Verify:**
+- Association ID matches your intended association
+- Date ranges are correct (remember: today's date is in results)
+- Filters are using correct RAMCO field names
+
+**Debug:**
+```
+"Show me the filter being applied to this query"
+"Return this query as JSON so I can see the exact data"
+```
+
+### Rate Limiting
+
+**If you hit rate limits:**
+- Wait 1 minute for reset
+- Use bulk tools instead of loops
+- Combine multiple questions into one query
+
+**Example:**
+❌ **Bad:** Ask 50 separate questions about individual members
+✅ **Good:** "Analyze engagement for all members" (one query)
+
+## Tips for Success
+
+### Regular Monitoring
+
+- **Weekly**: Quick health check, review critical alerts
+- **Monthly**: Full health assessment, retention review, financial analysis
+- **Quarterly**: Pattern analysis, strategy adjustment, trend comparison
+- **Annually**: Comprehensive review, goal setting, forecasting
+
+### Documentation
+
+Keep notes on:
+- Intervention strategies that work
+- Engagement patterns unique to your association
+- Seasonal trends (renewals, events, etc.)
+- Member segments and their characteristics
+
+### Continuous Improvement
+
+Track metrics over time:
+- Retention rate improvements
+- Engagement score trends
+- Collection rate changes
+- Response rates to interventions
+
+<Aside>
+  **Remember:** The RAMCO MCP Server is a tool to augment your expertise, not replace it. Use the insights to inform your strategies, but always apply your knowledge of your specific association and members.
+</Aside>
+
+## Next Steps
+
+- [API Reference](/docs/api-reference) - Complete tool documentation
+- [Examples](/docs/examples) - Real conversation examples
+- [Configuration](/docs/configuration) - Advanced settings
+
+<Aside type="tip">
+  **Pro Tip:** Create a recurring calendar reminder for your monthly health check workflow. Consistency in monitoring leads to better outcomes.
+</Aside>

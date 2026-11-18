@@ -1,0 +1,129 @@
+---
+import { createHighlighter } from 'shiki';
+
+const frameworks = [
+  {
+    name: 'Basic Setup',
+    code: `// Claude Desktop MCP Configuration
+{
+  "mcpServers": {
+    "ramco": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here"
+      }
+    }
+  }
+}`,
+  },
+  {
+    name: 'With Association Filter',
+    code: `// Filter all queries to specific association
+{
+  "mcpServers": {
+    "ramco": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here",
+        "ramco-association-id": "965ef164-1234-5678-abcd-123456789abc"
+      }
+    }
+  }
+}`,
+  },
+  {
+    name: 'Local Development',
+    code: `// Connect to local dev server
+{
+  "mcpServers": {
+    "ramco-local": {
+      "transport": "http",
+      "url": "http://localhost:3001/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here"
+      }
+    }
+  }
+}`,
+  },
+  {
+    name: 'SSE Transport',
+    code: `// Alternative SSE transport option
+{
+  "mcpServers": {
+    "ramco": {
+      "transport": "sse",
+      "url": "https://ramco.amsmcp.dev/sse",
+      "headers": {
+        "Key": "your-ramco-api-key-here"
+      }
+    }
+  }
+}`,
+  },
+  {
+    name: 'Multiple Associations',
+    code: `// Configure multiple associations separately
+{
+  "mcpServers": {
+    "ramco-assoc-1": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-api-key",
+        "ramco-association-id": "association-1-guid"
+      }
+    },
+    "ramco-assoc-2": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-api-key",
+        "ramco-association-id": "association-2-guid"
+      }
+    }
+  }
+}`,
+  },
+  {
+    name: 'With Authorization Header',
+    code: `// Alternative authentication format
+{
+  "mcpServers": {
+    "ramco": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Authorization": "Bearer your-ramco-api-key-here"
+      }
+    }
+  }
+}`,
+  },
+];
+
+// Pre-highlight all code samples at build time
+const highlighter = await createHighlighter({
+  themes: ['github-dark-high-contrast', 'github-light-default'],
+  langs: ['json'],
+});
+
+const highlightedFrameworks = frameworks.map((framework) => ({
+  name: framework.name,
+  code: framework.code,
+  lightHtml: highlighter.codeToHtml(framework.code, {
+    lang: 'json',
+    theme: 'github-light-default',
+  }),
+  darkHtml: highlighter.codeToHtml(framework.code, {
+    lang: 'json',
+    theme: 'github-dark-high-contrast',
+  }),
+}));
+---
+
+<script is:inline define:vars={{ highlightedFrameworks }}>
+  window.highlightedFrameworks = highlightedFrameworks;
+</script>

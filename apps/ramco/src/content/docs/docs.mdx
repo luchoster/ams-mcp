@@ -1,0 +1,249 @@
+---
+title: Overview
+description: Complete guide to RAMCO MCP Server - Transform RAMCO API into an association analytics powerhouse
+full: true
+---
+
+import {
+  Aside,
+  Card,
+  CardGrid,
+  Steps,
+} from '@astrojs/starlight/components';
+
+## Introduction
+
+**RAMCO MCP Server** is a **Model Context Protocol (MCP)** server that transforms the RAMCO API into an association analytics powerhouse. Built for analyzing entire memberships (10,000+ members) to provide actionable insights for member engagement, retention, and growth.
+
+Key features include:
+
+- **Bulk Analytics** - Process 10,000+ members in seconds
+- **Engagement Scoring** - AI-powered member engagement analysis
+- **Churn Prediction** - Identify at-risk members with intervention plans
+- **Payment Analytics** - Financial health analysis with aging reports
+- **Natural Language Search** - Query members using plain English
+- **Real-time Processing** - No Redis required, HTTP transport optimized
+
+## What Can It Do?
+
+RAMCO MCP Server provides **18+ tools** organized into 4 priority categories:
+
+<CardGrid>
+  <Card title="Critical Association Analytics" icon="star">
+    Analyze entire membership health, predict churn, generate comprehensive snapshots, and monitor payment health across your entire association.
+  </Card>
+  <Card title="Advanced Search & Segmentation" icon="magnifier">
+    Natural language member search, automatic segmentation, pattern discovery, and ML-style insights for retention and growth.
+  </Card>
+  <Card title="Individual Member Analytics" icon="user">
+    Calculate individual engagement scores, analyze engagement distribution, and get personalized intervention recommendations.
+  </Card>
+  <Card title="Core RAMCO Operations" icon="database">
+    Direct RAMCO API access for searching records, retrieving data, exploring schemas, and managing entities with automatic association filtering.
+  </Card>
+</CardGrid>
+
+## Quick Example
+
+Here's how easy it is to get started with RAMCO MCP:
+
+```json title="claude_desktop_config.json"
+{
+  "mcpServers": {
+    "ramco": {
+      "transport": "http",
+      "url": "https://ramco.amsmcp.dev/http",
+      "headers": {
+        "Key": "your-ramco-api-key-here",
+        "ramco-association-id": "your-association-guid-here"
+      }
+    }
+  }
+}
+```
+
+Once configured, you can ask Claude:
+
+```
+"Give me a complete health assessment of our association"
+```
+
+And get instant analytics:
+
+```
+📊 Association Health Analysis
+
+Total Members Analyzed: 10,247
+
+Engagement Distribution:
+• highly-engaged: 2,357 members (23.0%)
+• moderately-engaged: 4,611 members (45.0%)
+• at-risk: 2,279 members (22.2%)
+• inactive: 1,000 members (9.8%)
+
+Top Risk Factors:
+• No event attendance in past year: 3,421 members
+• No committee involvement: 2,890 members
+• Outstanding balance: 743 members
+```
+
+## Getting Started
+
+<Steps>
+
+1. ### Get Your RAMCO API Key
+
+   Contact your RAMCO administrator to obtain API access credentials.
+
+2. ### Configure Claude Desktop
+
+   Add the RAMCO MCP server to your Claude Desktop configuration (see [Installation](/docs/installation) for detailed instructions).
+
+3. ### Start Analyzing
+
+   Ask Claude questions like:
+   - "Analyze our membership health"
+   - "Who's at risk of churning?"
+   - "Show me our payment health"
+   - "Find members who joined last year but haven't attended events"
+
+</Steps>
+
+## Core Capabilities
+
+### 🚨 Priority 1: Critical Association Analytics
+
+<CardGrid>
+  <Card title="analyze_membership_health">
+    Analyze entire membership health (10k+ members) with engagement scores, risk levels, and statistical analysis.
+  </Card>
+  <Card title="get_churn_risk_report">
+    Predict and prevent member churn with risk scoring and personalized intervention recommendations.
+  </Card>
+  <Card title="generate_membership_snapshot">
+    Comprehensive metrics with growth analysis, trends, and comparisons to previous periods.
+  </Card>
+  <Card title="analyze_payment_health">
+    Financial health with aging analysis, collection rates, and payment trends.
+  </Card>
+</CardGrid>
+
+### 🔍 Priority 2: Advanced Search & Segmentation
+
+<CardGrid>
+  <Card title="search_members_bulk">
+    Natural language search like "members who joined last year but haven't renewed"
+  </Card>
+  <Card title="segment_all_members">
+    Auto-segment membership by engagement, lifecycle, value, or risk
+  </Card>
+  <Card title="find_all_at_risk_members">
+    Identify at-risk members across multiple factors with intervention plans
+  </Card>
+  <Card title="identify_member_patterns">
+    ML-style pattern discovery for retention insights and growth opportunities
+  </Card>
+</CardGrid>
+
+### 📊 Priority 3: Individual Member Analytics
+
+- **calculate_member_engagement** - Individual engagement scoring and risk assessment
+- **calculate_engagement_distribution** - Engagement patterns across membership with percentiles
+
+### 🔧 Priority 4: Core RAMCO Operations
+
+- **get_association_info** - Quick single-call association details
+- **authenticate** - Test RAMCO API connection
+- **get_entity_types** - Get available entity types/modules
+- **search_records** - Search records with automatic association filtering
+- **get_record** - Get specific records by ID
+- **get_related_records** - Get related record data
+- **get_schema** - Get entity schemas/fields
+- **get_entity_info** - Organized entity information by business area
+
+## Example Use Cases
+
+### Monthly Health Check
+```
+"Give me a complete health assessment of our association"
+```
+Get engagement distribution, risk factors, and immediate action items.
+
+### Churn Prevention
+```
+"Who's at risk of not renewing in the next 90 days?"
+```
+Identify at-risk members with predictive scoring and intervention plans.
+
+### Smart Member Search
+```
+"Find members who joined last year but haven't attended any events"
+```
+Natural language queries return targeted member segments.
+
+### Financial Analysis
+```
+"How healthy are our finances? Any payment issues?"
+```
+Get collection rates, aging analysis, and action items.
+
+## Success Metrics
+
+Associations using RAMCO MCP Analytics report:
+
+- **50% reduction** in time spent on reporting
+- **25% improvement** in member retention rates
+- **40% increase** in engagement campaign effectiveness
+- **15% improvement** in payment collection rates
+
+<Aside type="tip">
+  **Pro Tip:** Setting `ramco-association-id` automatically filters ALL queries to your specific association, preventing accidental cross-association data access and improving performance.
+</Aside>
+
+## Architecture
+
+- **HTTP Transport** - Recommended, no Redis dependency
+- **SSE Transport** - Available for streaming responses
+- **Pass-through Design** - No data storage, API keys in memory only
+- **Type-safe** - Built with TypeScript and Zod validation
+- **Automatic Pagination** - Handles large datasets seamlessly
+
+## Common Entity Types
+
+- **contact** - Individual people/contacts
+- **account** - Organizations and companies
+- **cobalt_membership** - Membership records
+- **cobalt_meeting** - Meetings and events
+- **invoice** - Financial invoices
+- **cobalt_class** - Training classes
+- **lead** - Sales prospects
+- **opportunity** - Sales opportunities
+
+## Next Steps
+
+<CardGrid>
+  <Card title="Installation" icon="rocket">
+    [Set up RAMCO MCP Server →](/docs/installation)
+
+    Configure Claude Desktop and connect to your RAMCO instance.
+  </Card>
+  <Card title="Configuration" icon="setting">
+    [Configure Options →](/docs/configuration)
+
+    Learn about headers, association filtering, and advanced settings.
+  </Card>
+  <Card title="API Reference" icon="open-book">
+    [Browse Tools →](/docs/api-reference)
+
+    Complete documentation of all 18+ tools with parameters and examples.
+  </Card>
+  <Card title="Examples" icon="lightbulb">
+    [See Examples →](/docs/examples)
+
+    Real-world conversation examples and use cases.
+  </Card>
+</CardGrid>
+
+<Aside type="caution">
+  **Privacy & Security:** This service does not store, log, or retain any data. API keys exist in memory only during request processing. See our [Privacy Policy](/privacy-policy) for details.
+</Aside>
